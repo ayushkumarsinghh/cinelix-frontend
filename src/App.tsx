@@ -8,11 +8,30 @@ import MovieShows from './pages/MovieShows';
 import SeatSelection from './pages/SeatSelection';
 import Checkout from './pages/Checkout';
 import MyBookings from './pages/MyBookings';
+import AdminDashboard from './pages/AdminDashboard';
+import VerifyTicket from './pages/VerifyTicket';
 
 import Navbar from './components/Navbar';
+import axios from 'axios';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   return (
     <Router>
@@ -25,6 +44,8 @@ function App() {
           <Route path="/shows/:id/seats" element={<SeatSelection />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/verify/:id" element={<VerifyTicket />} />
           <Route path="/" element={<Navigate to="/movies" replace />} />
         </Routes>
       </div>

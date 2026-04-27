@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, Clock, MapPin, ChevronLeft, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
@@ -7,7 +7,11 @@ interface Show {
   id: string;
   startTime: string;
   price: number;
-  theater: string;
+  theatreId: string;
+  theatre: {
+    name: string;
+    location: string;
+  };
 }
 
 interface Movie {
@@ -19,6 +23,10 @@ interface Movie {
 const MovieShows = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const theatreIdFilter = searchParams.get('theatreId');
+
   const [movie, setMovie] = useState<Movie | null>(null);
   const [shows, setShows] = useState<Show[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +39,12 @@ const MovieShows = () => {
           axios.get(`/api/movies/${id}/shows`)
         ]);
         setMovie(movieRes.data);
-        setShows(showsRes.data);
+        
+        let filteredShows = showsRes.data;
+        if (theatreIdFilter) {
+          filteredShows = showsRes.data.filter((s: Show) => s.theatreId === theatreIdFilter);
+        }
+        setShows(filteredShows);
       } catch (err) {
         console.error('Error fetching shows:', err);
       } finally {
@@ -39,7 +52,7 @@ const MovieShows = () => {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, theatreIdFilter]);
 
   if (isLoading) {
     return (
@@ -92,7 +105,7 @@ const MovieShows = () => {
                         </p>
                         <div className="flex items-center gap-4 mt-1 text-sm text-gray-400">
                           <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Today</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {show.theater}</span>
+                          <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {show.theatre.name}</span>
                         </div>
                       </div>
                     </div>

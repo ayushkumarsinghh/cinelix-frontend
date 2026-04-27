@@ -5,6 +5,10 @@ import axios from 'axios';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { io } from 'socket.io-client';
+
+const socket = io(window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin);
+
 function cn(...inputs: any[]) {
   return twMerge(clsx(inputs));
 }
@@ -36,6 +40,26 @@ const SeatSelection = () => {
       }
     };
     fetchSeats();
+
+    // Socket listeners
+    socket.emit('join_show', id);
+
+    socket.on('seat_update', ({ lockedSeats }) => {
+      setSeats(prev => prev.map(seat => 
+        lockedSeats.includes(seat.id) ? { ...seat, status: 'LOCKED' } : seat
+      ));
+    });
+
+    socket.on('booking_confirmed', ({ confirmedSeats }) => {
+      setSeats(prev => prev.map(seat => 
+        confirmedSeats.includes(seat.id) ? { ...seat, status: 'BOOKED' } : seat
+      ));
+    });
+
+    return () => {
+      socket.off('seat_update');
+      socket.off('booking_confirmed');
+    };
   }, [id]);
 
   const toggleSeat = (seatId: string) => {

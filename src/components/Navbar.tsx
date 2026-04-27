@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { User, LogOut, Film, Ticket } from 'lucide-react';
+import { User, LogOut, Film, Ticket, Lock } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -26,6 +26,13 @@ const Navbar = () => {
           <Link to="/my-bookings" className="text-gray-300 hover:text-white transition-colors text-sm font-medium flex items-center gap-2">
             <Ticket className="w-4 h-4" />
             My Bookings
+          </Link>
+        )}
+        
+        {isAuthenticated && localStorage.getItem('role') === 'ADMIN' && (
+          <Link to="/admin" className="text-gray-300 hover:text-white transition-colors text-sm font-medium flex items-center gap-2">
+            <Lock className="w-4 h-4" />
+            Admin
           </Link>
         )}
         
