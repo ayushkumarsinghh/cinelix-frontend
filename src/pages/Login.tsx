@@ -43,7 +43,7 @@ const Login = () => {
           <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-primary/40 transform -rotate-6">
             <Film className="text-white w-10 h-10" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
+          <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
             {isRegister ? 'Join Cinelix' : 'Welcome Back'}
           </h1>
           <p className="text-gray-400 text-center">
