@@ -12,6 +12,43 @@ const Checkout = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [isApplying, setIsApplying] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState('');
+
+  const ticketPrice = (seatIds?.length || 0) * 250;
+  const convenienceFee = 30;
+  const totalAmount = ticketPrice + convenienceFee - discountAmount;
+
+  const handleApplyPromo = () => {
+    if (!promoCode) return;
+    setIsApplying(true);
+    setPromoError('');
+    
+    // In a real app, this would be an API call to /api/promo/validate
+    setTimeout(() => {
+      const code = promoCode.toUpperCase();
+      let discount = 0;
+      
+      if (code === 'CINELIX50') {
+        discount = Math.floor(ticketPrice * 0.5);
+      } else if (code === 'WEEKEND100' && ticketPrice >= 500) {
+        discount = 100;
+      } else if (code === 'BOI20') {
+        discount = Math.floor(ticketPrice * 0.2);
+      } else {
+        setPromoError('Invalid or expired promo code');
+        setIsApplying(false);
+        return;
+      }
+
+      setDiscountAmount(discount);
+      setAppliedPromo(code);
+      setIsApplying(false);
+    }, 800);
+  };
 
   useEffect(() => {
     if (!showId || !seatIds) {
@@ -122,20 +159,64 @@ const Checkout = () => {
           <div className="grid md:grid-cols-2 gap-12">
             <div className="space-y-8">
               <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Promo Code</h3>
+                <div className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <input 
+                      type="text" 
+                      placeholder="Enter code (e.g. CINELIX50)"
+                      value={promoCode}
+                      onChange={e => setPromoCode(e.target.value)}
+                      disabled={!!appliedPromo}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent transition-all font-medium placeholder-gray-700"
+                    />
+                    {appliedPromo && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-accent font-bold text-[10px] uppercase">
+                        <ShieldCheck className="w-3 h-3" /> Applied
+                      </div>
+                    )}
+                  </div>
+                  {!appliedPromo ? (
+                    <button 
+                      onClick={handleApplyPromo}
+                      disabled={isApplying || !promoCode}
+                      className="px-6 py-3 bg-white/5 hover:bg-accent hover:text-[#070b0a] text-white rounded-xl font-bold transition-all disabled:opacity-50 border border-white/5"
+                    >
+                      {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => {setAppliedPromo(''); setDiscountAmount(0); setPromoCode('');}}
+                      className="px-4 py-3 text-red-500 hover:text-red-400 font-bold transition-all text-xs uppercase"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {promoError && <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1">{promoError}</p>}
+              </div>
+
+              <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Order Summary</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between text-gray-300">
                     <span>Tickets ({seatIds?.length}x)</span>
-                    <span>₹{seatIds?.length * 250}</span>
+                    <span>₹{ticketPrice}</span>
                   </div>
                   <div className="flex justify-between text-gray-300">
                     <span>Convenience Fee</span>
-                    <span>₹30</span>
+                    <span>₹{convenienceFee}</span>
                   </div>
+                  {appliedPromo && (
+                    <div className="flex justify-between text-accent font-bold">
+                      <span className="flex items-center gap-1"><Ticket className="w-3 h-3" /> Promo ({appliedPromo})</span>
+                      <span>-₹{discountAmount}</span>
+                    </div>
+                  )}
                   <div className="h-px bg-white/5 my-2"></div>
                   <div className="flex justify-between text-xl font-bold text-white">
                     <span>Total Amount</span>
-                    <span className="text-primary">₹{seatIds?.length * 250 + 30}</span>
+                    <span className="text-primary">₹{totalAmount}</span>
                   </div>
                 </div>
               </div>
