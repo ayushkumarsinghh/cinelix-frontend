@@ -6,10 +6,19 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
+        instrument: ['"Instrument Serif"', 'serif'],
+      },
       colors: {
         primary: {
           DEFAULT: '#E50914',
           hover: '#C10712',
+        },
+        accent: {
+          DEFAULT: '#5ed29c',
+          dark: '#070b0a'
         },
         surface: {
           DEFAULT: '#141414',
