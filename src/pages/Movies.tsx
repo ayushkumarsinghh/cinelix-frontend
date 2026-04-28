@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Play, Info, Calendar, Clock, ChevronRight, MapPin, Search, X, ArrowRight } from 'lucide-react';
+import { Play, Info, Calendar, Clock, ChevronRight, MapPin, Search, X, ArrowRight, Star } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 // @ts-ignore - Will resolve once npm install hls.js is complete
@@ -29,31 +29,44 @@ const Movies = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const isPremium = localStorage.getItem('isPremium') === 'true';
+
   const carouselSlides = [
     {
       id: 1,
-      title: "cinelix STREAM",
-      subtitle: "Step into a world of cinematic desire!",
-      buttonText: "Buy/Rent Online",
-      image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070",
+      title: "DUNE: PART TWO",
+      subtitle: "The desert journey continues in this cinematic masterpiece.",
+      buttonText: "Book Premiere Seats",
+      image: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?q=80&w=2070",
       color: "from-accent/90"
     },
     {
       id: 2,
-      title: "EXCLUSIVE PREMIERE",
-      subtitle: "Watch the latest blockbusters from your couch.",
-      buttonText: "Watch Now",
-      image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070",
+      title: "OPPENHEIMER",
+      subtitle: "The world changes forever. Experience Christopher Nolan's epic.",
+      buttonText: "Watch Trailer",
+      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070",
       color: "from-blue-600/80"
     },
-    {
-      id: 3,
-      title: "EARN REWARDS",
-      subtitle: "Get 20% back on your first 3 bookings.",
-      buttonText: "Join Cinelix+",
-      image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070",
-      color: "from-purple-600/80"
-    }
+    ...(isPremium ? [
+      {
+        id: 4,
+        title: "THE PREMIERE CLUB",
+        subtitle: "Your early access window is now open for this week's blockbusters.",
+        buttonText: "Exclusive Access",
+        image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070",
+        color: "from-accent/90"
+      }
+    ] : [
+      {
+        id: 3,
+        title: "EARN REWARDS",
+        subtitle: "Get 20% back on your first 3 bookings. Join Cinelix+ today.",
+        buttonText: "Join Cinelix+",
+        image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070",
+        color: "from-purple-600/80"
+      }
+    ])
   ];
 
   const genres = ['All', 'Action', 'Adventure', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller'];
@@ -135,97 +148,123 @@ const Movies = () => {
                 <img 
                   src={carouselSlides[currentSlide].image} 
                   alt={carouselSlides[currentSlide].title} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-105"
                 />
-                <div className={`absolute inset-0 bg-gradient-to-r ${carouselSlides[currentSlide].color} to-transparent flex items-center px-8 md:px-16`}>
-                  <div className="text-[#070b0a]">
-                    <h2 className="text-3xl md:text-5xl font-extrabold mb-2 tracking-tight uppercase">{carouselSlides[currentSlide].title}</h2>
-                    <p className="text-xl md:text-3xl font-bold mb-6 text-white drop-shadow-md">{carouselSlides[currentSlide].subtitle}</p>
-                    <button className="bg-[#070b0a] text-white hover:bg-white hover:text-[#070b0a] transition-all border-2 border-[#070b0a] px-8 py-2.5 rounded-lg font-bold shadow-lg">
-                      {carouselSlides[currentSlide].buttonText}
-                    </button>
+                <div className={`absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/40 to-transparent flex items-center px-10 md:px-24`}>
+                  <div className="text-white max-w-2xl">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-[2px] bg-accent"></div>
+                      <span className="text-xs font-black uppercase tracking-[0.5em] text-accent">Trending Premiere</span>
+                    </div>
+                    <h2 className="text-4xl md:text-6xl font-cinematic mb-4 tracking-tight leading-none">{carouselSlides[currentSlide].title}</h2>
+                    <p className="text-base md:text-lg font-light mb-8 text-gray-300 max-w-lg leading-relaxed">{carouselSlides[currentSlide].subtitle}</p>
+                    <div className="flex items-center gap-6">
+                      <button className="bg-accent text-[#070b0a] hover:bg-white transition-all px-8 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-[10px] shadow-2xl flex items-center gap-3 group">
+                        {carouselSlides[currentSlide].buttonText}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             </AnimatePresence>
-            
-            {/* Carousel Controls */}
-            <div className="absolute bottom-6 right-10 flex gap-2 z-10">
-              {carouselSlides.map((_, i) => (
-                <button 
-                  key={i}
-                  onClick={() => setCurrentSlide(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${currentSlide === i ? 'bg-white w-8' : 'bg-white/30 hover:bg-white/50'}`}
-                />
-              ))}
+            <div className="absolute bottom-10 right-10 flex items-center gap-4 z-10">
+              <div className="flex gap-2">
+                {carouselSlides.map((_, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'bg-accent w-10' : 'bg-white/20 w-4'}`}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2 ml-4 border-l border-white/10 pl-4">
+                 <button 
+                   onClick={() => setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
+                   className="w-10 h-10 rounded-xl bg-white/5 hover:bg-accent hover:text-[#070b0a] transition-all flex items-center justify-center border border-white/10"
+                 >
+                   <ChevronRight className="w-5 h-5 rotate-180" />
+                 </button>
+                 <button 
+                   onClick={() => setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)}
+                   className="w-10 h-10 rounded-xl bg-white/5 hover:bg-accent hover:text-[#070b0a] transition-all flex items-center justify-center border border-white/10"
+                 >
+                   <ChevronRight className="w-5 h-5" />
+                 </button>
+              </div>
             </div>
-
-            <button 
-              onClick={() => setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
-              className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all border border-white/10"
-            >
-              <ChevronRight className="w-7 h-7 rotate-180" />
-            </button>
-            <button 
-              onClick={() => setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)}
-              className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all border border-white/10"
-            >
-              <ChevronRight className="w-7 h-7" />
-            </button>
           </div>
         </div>
       </div>
+      {/* Banner Section End */}
 
       {/* Movies Grid */}
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-6">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
-              Recommended Movies
-            </h2>
-            <p className="text-gray-400 text-sm">
-              Discover the most popular movies playing near you.
-            </p>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search movies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#111815] border border-white/10 text-white pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-accent transition-all"
-              />
+        <div className="mb-12">
+          <div className="bg-[#111815]/40 border border-white/5 rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-8 backdrop-blur-xl">
+            <div className="flex items-center gap-6 w-full lg:w-auto">
+              <Search className="w-5 h-5 text-accent/60" />
+              <div className="flex-1 lg:w-72">
+                <p className="text-[9px] text-accent font-bold uppercase tracking-[0.3em] mb-1 opacity-60">Search Collection</p>
+                <input
+                  type="text"
+                  placeholder="Search titles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-white text-lg font-cinematic placeholder-gray-800 focus:outline-none tracking-wide"
+                />
+              </div>
             </div>
-            
-            <div className="flex items-center gap-2 bg-[#111815] border border-white/10 px-4 py-2.5 rounded-xl w-full md:w-auto hover:bg-white/5 cursor-pointer transition-colors">
-              <MapPin className="text-accent w-5 h-5" />
-              <select 
-                value={selectedTheatre}
-                onChange={(e) => setSelectedTheatre(e.target.value)}
-                className="bg-transparent text-white outline-none w-full md:w-auto cursor-pointer font-medium"
-              >
-                <option value="all" className="bg-[#111815]">All Locations</option>
-                {theatres.map(t => (
-                  <option key={t.id} value={t.id} className="bg-[#111815]">{t.name}</option>
-                ))}
-              </select>
+
+            <div className="h-10 w-[1px] bg-white/5 hidden lg:block"></div>
+
+            <div className="flex items-center gap-6 w-full lg:w-auto">
+              <MapPin className="w-5 h-5 text-accent/60" />
+              <div className="flex-1 lg:w-60">
+                <p className="text-[9px] text-accent font-bold uppercase tracking-[0.3em] mb-1 opacity-60">Cinema Venue</p>
+                <select 
+                  value={selectedTheatre}
+                  onChange={(e) => setSelectedTheatre(e.target.value)}
+                  className="bg-transparent text-white text-lg font-cinematic outline-none w-full cursor-pointer tracking-wide"
+                >
+                  <option value="all" className="bg-[#070b0a]">Select Your Cinema</option>
+                  {theatres.map(t => (
+                    <option key={t.id} value={t.id} className="bg-[#070b0a]">{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <button className="w-full lg:w-auto bg-white/5 hover:bg-white/10 text-white px-10 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-[10px] transition-all border border-white/10">
+              Apply Filters
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-6">
+          <div className="flex items-center gap-6">
+            <div className="w-1 h-12 bg-accent rounded-full"></div>
+            <div>
+              <h2 className="text-5xl font-cinematic text-white tracking-tight">
+                Now <span className="text-accent italic">Screening</span>
+              </h2>
+              <p className="text-gray-500 text-[11px] font-medium uppercase tracking-[0.3em] mt-2">
+                Handpicked cinematic masterpieces for the discerning viewer
+              </p>
             </div>
           </div>
         </div>
 
         {/* Categories */}
-        <div className="flex gap-3 overflow-x-auto pb-8 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-12 scrollbar-hide">
           {genres.map(genre => (
             <button
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-6 py-2.5 rounded-xl whitespace-nowrap text-sm font-bold transition-all border ${
+              className={`px-10 py-3 rounded-full whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.2em] transition-all border ${
                 selectedGenre === genre 
-                  ? 'bg-accent text-[#070b0a] border-accent shadow-[0_0_20px_rgba(94,210,156,0.3)]' 
-                  : 'bg-[#111815] border-white/5 text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-accent text-[#070b0a] border-accent shadow-xl scale-105' 
+                  : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
               }`}
             >
               {genre}
@@ -238,56 +277,46 @@ const Movies = () => {
             {filteredMovies.map((movie, index) => (
               <motion.div
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.03 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
                 key={movie.id}
-                className="bg-[#111815] rounded-2xl overflow-hidden shadow-2xl border border-white/5 hover:border-accent/40 hover:shadow-[0_0_30px_rgba(94,210,156,0.1)] transition-all group flex flex-col cursor-pointer"
+                className="group flex flex-col cursor-pointer"
                 onClick={() => navigate(`/movies/${movie.id}/shows${selectedTheatre !== 'all' ? `?theatreId=${selectedTheatre}` : ''}`)}
               >
-                <div className="relative aspect-[2/3] overflow-hidden bg-[#0a0f0c]">
+                <div className="relative aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-[#0a0f0c] shadow-2xl border border-white/5 group-hover:border-accent/40 transition-all duration-500">
                   <img 
                     src={movie.imageUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop"} 
                     alt={movie.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent opacity-60"></div>
+                  
+                  <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                     {movie.trailerUrl && (
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedTrailer(movie.trailerUrl!);
                         }}
-                        className="w-14 h-14 bg-accent text-[#070b0a] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-xl"
+                        className="w-20 h-20 bg-white text-[#070b0a] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.4)]"
                       >
-                        <Play className="w-6 h-6 ml-1 fill-current" />
+                        <Play className="w-8 h-8 ml-1 fill-current" />
                       </button>
                     )}
                   </div>
-                  {/* Rating Tag */}
-                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-lg text-xs font-black text-white flex items-center gap-1.5 border border-white/10 shadow-lg">
-                    <span className="text-accent text-sm leading-none">★</span> 8.5
+
+                  <div className="absolute bottom-8 left-8 right-8">
+                    <span className="text-accent text-[10px] font-bold uppercase tracking-[0.3em] mb-4 inline-block">
+                      {movie.duration} Minutes
+                    </span>
+                    <h3 className="text-white font-cinematic text-3xl tracking-tight leading-none group-hover:text-accent transition-colors truncate">
+                      {movie.title}
+                    </h3>
                   </div>
-                </div>
-                
-                <div className="p-5 flex flex-col flex-1">
-                  <h3 className="text-white font-bold text-lg leading-tight mb-2 group-hover:text-accent transition-colors line-clamp-1">{movie.title}</h3>
-                  <div className="flex items-center gap-2 text-gray-500 text-xs mb-4 font-medium">
-                    <span className="line-clamp-1">{movie.genre || 'Action'}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1 shrink-0"><Clock className="w-3.5 h-3.5" /> {movie.duration}m</span>
-                  </div>
-                  
-                  <div className="mt-auto">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/movies/${movie.id}/shows${selectedTheatre !== 'all' ? `?theatreId=${selectedTheatre}` : ''}`);
-                      }}
-                      className="w-full bg-accent/5 text-accent border border-accent/30 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-accent hover:text-[#070b0a] hover:border-accent transition-all shadow-sm"
-                    >
-                      Book Tickets
-                    </button>
+
+                  <div className="absolute top-6 right-6 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-black text-white flex items-center gap-2 border border-white/10 shadow-lg opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
+                    <Star className="text-accent w-4 h-4 fill-accent" /> 8.5
                   </div>
                 </div>
               </motion.div>

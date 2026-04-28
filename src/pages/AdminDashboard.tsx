@@ -344,7 +344,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 pb-32">
+    <div style={{ zoom: 0.75 }}>
+      <div className="max-w-7xl mx-auto px-6 py-12 pb-32">
       <div className="flex items-center justify-between mb-12">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center">
@@ -368,25 +369,31 @@ const AdminDashboard = () => {
 
       {!selectedShow && stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
-          <div className="bg-[#111815] p-6 rounded-3xl border border-white/5 shadow-2xl">
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-2 font-black">Total Revenue</p>
-            <h4 className="text-2xl font-black text-accent italic">₹{stats.totalRevenue}</h4>
+          <div className="bg-[#111815] p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group hover:border-accent/30 transition-all">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-accent/5 rounded-bl-[2rem] flex items-center justify-center">
+              <RefreshCw className="w-5 h-5 text-accent opacity-20 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] mb-2 font-black italic">Revenue</p>
+            <h4 className="text-2xl font-black text-accent italic tracking-tighter">₹{stats.totalRevenue.toLocaleString()}</h4>
           </div>
-          <div className="bg-[#111815] p-6 rounded-3xl border border-white/5 shadow-2xl">
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-2 font-black">Tickets Sold</p>
-            <h4 className="text-2xl font-black text-white">{stats.totalTickets}</h4>
+          <div className="bg-[#111815] p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group hover:border-accent/30 transition-all">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-bl-[2rem] flex items-center justify-center">
+              <Plus className="w-5 h-5 text-gray-700 group-hover:text-white transition-colors" />
+            </div>
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] mb-2 font-black italic">Admissions</p>
+            <h4 className="text-2xl font-black text-white italic tracking-tighter">{stats.totalTickets}</h4>
           </div>
-          <div className="bg-[#111815] p-6 rounded-3xl border border-white/5 shadow-2xl">
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-2 font-black">Total Movies</p>
-            <h4 className="text-2xl font-black text-white">{stats.totalMovies}</h4>
+          <div className="bg-[#111815] p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group hover:border-accent/30 transition-all">
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] mb-2 font-black italic">Catalog</p>
+            <h4 className="text-2xl font-black text-white italic tracking-tighter">{stats.totalMovies}</h4>
           </div>
-          <div className="bg-[#111815] p-6 rounded-3xl border border-white/5 shadow-2xl">
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-2 font-black">Total Theatres</p>
-            <h4 className="text-2xl font-black text-white">{stats.totalTheatres}</h4>
+          <div className="bg-[#111815] p-6 rounded-[2rem] border border-white/5 shadow-2xl relative overflow-hidden group hover:border-accent/30 transition-all">
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] mb-2 font-black italic">Screens</p>
+            <h4 className="text-2xl font-black text-white italic tracking-tighter">{stats.totalTheatres}</h4>
           </div>
-          <div className="bg-accent p-6 rounded-3xl border border-accent shadow-2xl col-span-2 md:col-span-1 lg:col-span-1">
-            <p className="text-[10px] text-[#070b0a] uppercase tracking-[0.2em] mb-2 font-black">Top Movie</p>
-            <h4 className="text-lg font-black text-[#070b0a] truncate uppercase italic leading-tight">{stats.mostPopularMovie}</h4>
+          <div className="bg-accent p-6 rounded-[2rem] border border-accent shadow-[0_20px_40px_-10px_rgba(94,210,156,0.3)] col-span-2 md:col-span-1 lg:col-span-1 transform hover:-rotate-1 transition-transform">
+            <p className="text-[9px] text-[#070b0a] uppercase tracking-[0.3em] mb-1 font-black italic opacity-60">Trending Now</p>
+            <h4 className="text-base font-black text-[#070b0a] truncate uppercase italic leading-none">{stats.mostPopularMovie}</h4>
           </div>
         </div>
       )}
@@ -527,7 +534,7 @@ const AdminDashboard = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {isLoading ? (
                     <div className="flex justify-center py-12"><Loader2 className="animate-spin w-10 h-10 text-accent" /></div>
                   ) : movies.length === 0 ? (
@@ -544,27 +551,46 @@ const AdminDashboard = () => {
                     </div>
                   ) : (
                     movies.map(movie => (
-                      <div key={movie.id} className="bg-[#111815] p-5 rounded-[2rem] flex items-center justify-between border border-white/5 shadow-xl group hover:border-accent/30 transition-all">
-                        <div className="flex items-center gap-6">
-                          <img src={movie.imageUrl} className="w-20 h-20 rounded-2xl object-cover shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-500" alt="" />
-                          <div>
-                            <h3 className="font-bold text-white text-lg uppercase tracking-tight">{movie.title}</h3>
-                            <p className="text-sm text-gray-500 font-bold">{movie.genre} • {movie.duration} mins</p>
+                      <div key={movie.id} className="group relative bg-[#111815] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-accent/40 transition-all duration-500 shadow-2xl hover:-translate-y-2">
+                        <div className="aspect-[16/9] relative overflow-hidden">
+                          <img 
+                            src={movie.imageUrl} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                            alt={movie.title} 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#111815] via-transparent to-transparent opacity-60"></div>
+                          
+                          <div className="absolute top-4 right-4 flex gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                            <button 
+                              onClick={() => setEditingMovie(movie)}
+                              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-accent hover:text-[#070b0a] transition-all"
+                              title="Edit Movie"
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteMovie(movie.id)}
+                              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-500 transition-all"
+                              title="Delete Movie"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="absolute bottom-4 left-6">
+                            <span className="bg-accent/20 backdrop-blur-md text-accent text-[8px] font-black px-2 py-1 rounded-md uppercase tracking-[0.2em] border border-accent/20">
+                              {movie.duration} Mins
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button 
-                            onClick={() => setEditingMovie(movie)}
-                            className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-accent transition-all"
-                          >
-                            <Save className="w-5 h-5" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteMovie(movie.id)}
-                            className="w-12 h-12 rounded-xl bg-red-500/5 flex items-center justify-center text-gray-500 hover:text-red-500 transition-all"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+
+                        <div className="p-6">
+                          <h3 className="font-black text-white text-lg uppercase tracking-tighter italic mb-1 group-hover:text-accent transition-colors truncate">
+                            {movie.title}
+                          </h3>
+                          <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">
+                            {movie.genre}
+                          </p>
                         </div>
                       </div>
                     ))
@@ -841,40 +867,44 @@ const AdminDashboard = () => {
                   <Armchair className="w-16 h-16 text-gray-800 mx-auto mb-6 opacity-20" />
                   <p className="text-gray-500 font-black uppercase tracking-widest">No physical layout found</p>
                 </div>
-              ) : Object.entries(
-                showSeats.reduce((acc: any, seat: any) => {
-                  if (!acc[seat.row]) acc[seat.row] = [];
-                  acc[seat.row].push(seat);
-                  return acc;
-                }, {})
-              ).map(([rowLabel, rowSeats]: [string, any]) => (
-                <div key={rowLabel} className="flex items-center gap-10">
-                  <span className="w-8 text-sm text-gray-700 font-black italic">{rowLabel}</span>
-                  <div className="grid grid-cols-10 gap-4">
-                    {rowSeats.sort((a: any, b: any) => a.number - b.number).map((seat: any) => (
-                      <button
-                        key={seat.id}
-                        onClick={() => toggleSeatStatus(seat)}
-                        className={`
-                          group relative w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-500
-                          ${seat.isBooked 
-                            ? 'bg-red-500/10 border-2 border-red-500/30 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.15)]' 
-                            : 'bg-[#070b0a] border-2 border-white/5 text-gray-600 hover:border-accent hover:text-accent hover:shadow-[0_0_20px_rgba(94,210,156,0.2)]'}
-                        `}
-                      >
-                        <Armchair className={`w-5 h-5 ${seat.isBooked ? '' : 'group-hover:scale-110 transition-transform'}`} />
-                        <span className="text-[9px] font-black mt-1 uppercase italic tracking-tighter">{seat.seatNumber}</span>
-                        {seat.isBooked && (
-                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-[#111815] shadow-lg">
-                             <X className="w-3 h-3" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <span className="w-8 text-sm text-gray-700 font-black italic text-right">{rowLabel}</span>
-                </div>
-              ))}
+              ) : (
+                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].map((rowLabel) => {
+                  const rowSeats = showSeats.filter((s: any) => s.row === rowLabel);
+                  
+                  if (rowSeats.length === 0) {
+                    return <div key={rowLabel} className="h-12 w-full" />;
+                  }
+
+                  return (
+                    <div key={rowLabel} className="flex items-center gap-10">
+                      <span className="w-8 text-sm text-gray-700 font-black italic">{rowLabel}</span>
+                      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+                        {rowSeats.sort((a: any, b: any) => a.number - b.number).map((seat: any) => (
+                          <button
+                            key={seat.id}
+                            onClick={() => toggleSeatStatus(seat)}
+                            className={`
+                              group relative w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-500
+                              ${seat.isBooked 
+                                ? 'bg-red-500/10 border-2 border-red-500/30 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.15)]' 
+                                : 'bg-[#070b0a] border-2 border-white/5 text-gray-600 hover:border-accent hover:text-accent hover:shadow-[0_0_20px_rgba(94,210,156,0.2)]'}
+                            `}
+                          >
+                            <Armchair className={`w-5 h-5 ${seat.isBooked ? '' : 'group-hover:scale-110 transition-transform'}`} />
+                            <span className="text-[9px] font-black mt-1 uppercase italic tracking-tighter">{seat.seatNumber}</span>
+                            {seat.isBooked && (
+                              <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-[#111815] shadow-lg">
+                                 <X className="w-3 h-3" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <span className="w-8 text-sm text-gray-700 font-black italic text-right">{rowLabel}</span>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             <div className="mt-20 flex gap-16 border-t border-white/5 pt-12">
@@ -905,17 +935,39 @@ const AdminDashboard = () => {
             onClick={() => setEditingMovie(null)}
           ></motion.div>
           <motion.div 
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            initial={{ scale: 0.9, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            className="relative w-full max-w-2xl bg-[#111815] p-10 rounded-[3rem] border border-white/10 shadow-2xl overflow-hidden"
+            exit={{ scale: 0.9, opacity: 0, y: 40 }}
+            className="relative w-full max-w-4xl bg-[#0a0f0d] rounded-[3.5rem] overflow-hidden border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] flex flex-col md:flex-row"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-accent/20">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                className="h-full bg-accent"
+            {/* Left Side: Movie Poster Preview */}
+            <div className="w-full md:w-80 relative overflow-hidden hidden md:block">
+              <img 
+                src={editingMovie.imageUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop'} 
+                alt={editingMovie.title}
+                className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
               />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#0a0f0d]"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f0d] via-transparent to-transparent"></div>
+              
+              <div className="absolute bottom-12 left-10 right-10">
+                <div className="flex items-center gap-3 mb-4">
+                   <div className="w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_10px_rgba(212,175,55,0.8)]"></div>
+                   <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">Live Preview</span>
+                </div>
+                <h3 className="text-3xl font-cinematic text-white leading-tight mb-3">{editingMovie.title || 'Untitled'}</h3>
+                <p className="text-[11px] text-gray-400 font-medium uppercase tracking-[0.2em]">{editingMovie.genre || 'Genre Not Set'}</p>
+              </div>
             </div>
+
+            <div className="flex-1 p-12 relative">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  className="h-full bg-gradient-to-r from-accent/50 via-accent to-accent/50"
+                />
+              </div>
             
             <button 
               onClick={() => setEditingMovie(null)}
@@ -924,12 +976,15 @@ const AdminDashboard = () => {
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-2xl font-bold text-white mb-10 uppercase tracking-tight flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                <RefreshCw className="w-5 h-5 text-accent" />
+            <div className="flex items-center gap-5 mb-10">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20">
+                <RefreshCw className="w-6 h-6 text-accent" />
               </div>
-              Update <span className="text-accent">Metadata</span>
-            </h2>
+              <div>
+                <h2 className="text-4xl font-cinematic text-white tracking-tight leading-none">Update <span className="text-accent italic">Movie Data</span></h2>
+                <p className="text-[10px] text-accent/60 font-bold uppercase tracking-[0.4em] mt-3">Curating the Cinematic Experience</p>
+              </div>
+            </div>
 
             <form onSubmit={handleUpdateMovie} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <div className="space-y-2">
@@ -938,7 +993,8 @@ const AdminDashboard = () => {
                   type="text" 
                   value={editingMovie.title}
                   onChange={e => setEditingMovie({...editingMovie, title: e.target.value})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner" 
+                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
+                  placeholder="Cinematic Title"
                 />
               </div>
               <div className="space-y-2">
@@ -947,7 +1003,7 @@ const AdminDashboard = () => {
                   type="text" 
                   value={editingMovie.genre}
                   onChange={e => setEditingMovie({...editingMovie, genre: e.target.value})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner" 
+                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
                 />
               </div>
               <div className="space-y-2">
@@ -956,7 +1012,7 @@ const AdminDashboard = () => {
                   type="number" 
                   value={editingMovie.duration}
                   onChange={e => setEditingMovie({...editingMovie, duration: parseInt(e.target.value)})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner" 
+                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
                 />
               </div>
               <div className="space-y-2">
@@ -965,7 +1021,7 @@ const AdminDashboard = () => {
                   type="text" 
                   value={editingMovie.trailerUrl || ''}
                   onChange={e => setEditingMovie({...editingMovie, trailerUrl: e.target.value})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner" 
+                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
                 />
               </div>
               <div className="space-y-2 col-span-2">
@@ -982,7 +1038,8 @@ const AdminDashboard = () => {
                 <textarea 
                   value={editingMovie.description}
                   onChange={e => setEditingMovie({...editingMovie, description: e.target.value})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium h-28 shadow-inner resize-none" 
+                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold h-32 shadow-2xl resize-none" 
+                  placeholder="Narrative summary of the movie..."
                 />
               </div>
               <div className="col-span-2 flex justify-end gap-4 mt-8">
@@ -995,15 +1052,17 @@ const AdminDashboard = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="bg-accent hover:bg-white text-[#070b0a] px-10 py-4 rounded-2xl font-black transition-all shadow-xl shadow-accent/10 uppercase italic tracking-tighter"
+                  className="bg-accent hover:bg-white text-[#070b0a] px-16 py-5 rounded-full font-bold transition-all shadow-2xl uppercase tracking-[0.2em] text-xs transform hover:-translate-y-1 active:translate-y-0"
                 >
-                  Commit Update
+                  Apply Changes
                 </button>
               </div>
             </form>
+          </div>
           </motion.div>
         </div>
       )}
+      </div>
     </div>
   );
 };

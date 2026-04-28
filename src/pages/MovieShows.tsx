@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, Clock, MapPin, ChevronLeft, Loader2, Star } from 'lucide-react';
+import { Calendar, Clock, MapPin, ChevronLeft, Loader2, Star, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 
 interface Show {
@@ -91,89 +91,88 @@ const MovieShows = () => {
   return (
     <div className="w-full bg-[#070b0a] min-h-screen pb-20">
       {/* Immersive Movie Detail Banner */}
-      <div className="relative w-full h-[450px] md:h-[500px] border-b border-white/5">
+      <div className="relative w-full h-[550px] overflow-hidden border-b border-white/5">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 md:opacity-100"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
           style={{ backgroundImage: `url(${movie?.imageUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop'})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/95 to-transparent hidden md:block" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-[#070b0a]/60 to-transparent md:hidden" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent hidden md:block" />
+        <div className="absolute inset-0 bg-[#070b0a]/80 backdrop-blur-xl md:backdrop-blur-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/90 to-transparent hidden md:block" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent" />
         
-        <div className="relative max-w-7xl mx-auto px-4 h-full flex flex-col md:flex-row items-end md:items-center gap-10 pt-20 md:pt-16 pb-10 md:pb-0">
-          <div className="hidden md:block w-[260px] h-[390px] rounded-xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] flex-shrink-0 z-10 border border-white/10 relative transform translate-y-8">
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex flex-col md:flex-row items-center gap-12 pt-24">
+          <div className="hidden md:block w-[300px] aspect-[2/3] rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] flex-shrink-0 z-10 border border-white/10 relative group">
             <img 
               src={movie?.imageUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop'} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               alt={movie?.title}
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm text-white text-center py-2 text-xs font-bold uppercase tracking-widest border-t border-white/10">
-              In Cinemas
+            <div className="absolute bottom-6 left-6 right-6 flex justify-center">
+               <span className="bg-accent/20 backdrop-blur-md text-accent text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-[0.2em] border border-accent/20">In Cinemas Now</span>
             </div>
           </div>
 
           <div className="flex flex-col text-white z-10 w-full">
             <button 
               onClick={() => navigate('/movies')}
-              className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors w-max mb-6 md:mb-4"
+              className="flex items-center gap-2 text-gray-500 hover:text-accent transition-all w-max mb-8 font-black uppercase tracking-[0.3em] text-[10px]"
             >
-              <ChevronLeft className="w-4 h-4" /> Movies
+              <ChevronLeft className="w-4 h-4" /> Return to Catalog
             </button>
 
-            <h1 className="text-4xl md:text-[44px] font-bold tracking-tight mb-4 md:mb-6 leading-none">{movie?.title}</h1>
+            <div className="flex items-center gap-3 mb-6">
+               <div className="w-12 h-[1px] bg-accent"></div>
+               <span className="text-[11px] font-bold text-accent uppercase tracking-[0.4em]">Premiere Experience</span>
+            </div>
             
-            <div className="bg-[#111815]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-center justify-between w-full max-w-[450px] mb-6 shadow-xl">
-              <div className="flex items-center gap-3">
-                <Star className="text-accent w-6 h-6 fill-accent" />
-                <div>
-                  <div className="font-bold text-lg leading-tight">106K+ are interested</div>
-                  <div className="text-[11px] text-gray-400">Ratings & Reviews are verified</div>
-                </div>
+            <h1 className="text-6xl md:text-8xl font-cinematic tracking-tight mb-8 leading-tight">{movie?.title}</h1>
+            
+            <div className="flex flex-wrap items-center gap-8 mb-12">
+              <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 py-4">
+                <Star className="text-accent w-5 h-5 fill-accent" />
+                <div className="text-sm font-bold tracking-wide">8.5 <span className="text-gray-500 font-normal ml-1 text-[11px]">(106K Votes)</span></div>
               </div>
-              <button className="bg-white/10 hover:bg-white/20 border border-white/10 px-4 py-2 rounded-lg text-xs font-semibold transition-colors">Rate now</button>
+              <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 py-4 text-gray-300 text-[11px] font-bold uppercase tracking-[0.2em]">
+                {movie?.genre || 'Action, Drama, Thriller'}
+              </div>
+              <div className="flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 py-4 text-gray-300 text-[11px] font-bold uppercase tracking-[0.2em]">
+                <Clock className="w-4 h-4 text-accent" /> {movie?.duration || 145} Minutes
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="bg-white/10 text-white px-2.5 py-1 rounded shadow-sm text-xs font-bold border border-white/5">2D, IMAX 2D</span>
-              <span className="bg-white/10 text-white px-2.5 py-1 rounded shadow-sm text-xs font-bold border border-white/5">English, Hindi</span>
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <button 
+                onClick={() => document.getElementById('showtimes')?.scrollIntoView({ behavior: 'smooth' })}
+                className="bg-accent text-[#070b0a] hover:bg-white font-bold py-5 px-20 rounded-full text-sm w-full md:w-max transition-all shadow-2xl uppercase tracking-[0.2em] flex items-center justify-center gap-3 group"
+              >
+                Secure Your Seats
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <div className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-green-500/50"></div>
+                 Experience Excellence
+              </div>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-[14px] text-gray-300 font-medium mb-8">
-              <span>{movie?.duration || 145}m</span>
-              <span>•</span>
-              <span>{movie?.genre || 'Action, Drama, Thriller'}</span>
-              <span>•</span>
-              <span>UA13+</span>
-              <span>•</span>
-              <span>10 Apr, 2026</span>
-            </div>
-
-            <button 
-              onClick={() => document.getElementById('showtimes')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-accent text-[#070b0a] hover:bg-white font-bold py-3.5 px-16 rounded-xl text-[16px] w-full md:w-max transition-all shadow-[0_0_20px_rgba(94,210,156,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-            >
-              Book tickets
-            </button>
           </div>
         </div>
       </div>
 
       {/* Date Bar */}
-      <div className="sticky top-0 z-30 bg-[#070b0a]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto py-4 scrollbar-hide">
+      <div className="sticky top-0 z-30 bg-[#070b0a]/60 backdrop-blur-3xl border-b border-white/5 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 flex items-center gap-6 overflow-x-auto py-6 scrollbar-hide">
           {availableDates.map((dateObj) => (
             <button
               key={dateObj.full}
               onClick={() => setSelectedDate(dateObj.full)}
-              className={`flex flex-col items-center justify-center min-w-[70px] h-[70px] rounded-xl transition-all border ${
+              className={`flex flex-col items-center justify-center min-w-[90px] h-[90px] rounded-[2rem] transition-all border-2 ${
                 selectedDate === dateObj.full 
-                  ? 'bg-accent border-accent text-[#070b0a] shadow-[0_0_20px_rgba(94,210,156,0.2)]' 
-                  : 'bg-transparent border-white/5 text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-accent border-accent text-[#070b0a] shadow-2xl scale-105' 
+                  : 'bg-transparent border-white/5 text-gray-500 hover:text-white hover:bg-white/5'
               }`}
             >
-              <span className="text-[10px] font-bold uppercase tracking-widest">{dateObj.day}</span>
-              <span className="text-xl font-black">{dateObj.date}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest">{dateObj.month}</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.3em] mb-2">{dateObj.day}</span>
+              <span className="text-3xl font-cinematic leading-none">{dateObj.date}</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.3em] mt-2">{dateObj.month}</span>
             </button>
           ))}
         </div>
@@ -188,7 +187,10 @@ const MovieShows = () => {
 
           <div className="w-full h-px bg-white/5 mb-10" />
 
-          <h2 id="showtimes" className="text-[22px] font-bold text-white mb-6">Available Showtimes</h2>
+          <div className="flex items-center gap-4 mb-8">
+            <h2 id="showtimes" className="text-4xl font-cinematic text-white tracking-tight">Available <span className="text-accent italic">Showtimes</span></h2>
+            <div className="h-[1px] flex-1 bg-white/5 ml-4"></div>
+          </div>
           
           <div className="space-y-6">
             {allShows.length > 0 ? (
@@ -198,37 +200,37 @@ const MovieShows = () => {
                 const theatre = theatreShows[0].theatre;
                 
                 return (
-                  <div key={theatreId} className="bg-[#111815] rounded-2xl border border-white/5 overflow-hidden shadow-xl">
-                    <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <MapPin className="text-accent w-5 h-5" />
+                  <div key={theatreId} className="bg-[#111815]/60 backdrop-blur-3xl rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl group hover:border-accent/10 transition-all duration-500">
+                    <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-accent/30 transition-colors">
+                           <MapPin className="text-accent/60 w-6 h-6" />
+                        </div>
                         <div>
-                          <h3 className="text-white font-bold">{theatre.name}</h3>
-                          <p className="text-gray-500 text-xs">{theatre.location} • M-Ticket Available</p>
+                          <h3 className="text-2xl font-cinematic text-white tracking-tight group-hover:text-accent transition-colors">{theatre.name}</h3>
+                          <p className="text-gray-500 text-[9px] font-bold uppercase tracking-[0.3em] mt-1">{theatre.location} • Premium Venue</p>
                         </div>
                       </div>
-                      <div className="hidden md:flex items-center gap-6 text-[11px] text-gray-400 font-bold uppercase tracking-widest">
-                        <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500"/> Fast Filling</span>
-                        <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-accent"/> Available</span>
+                      <div className="hidden md:flex items-center gap-8 text-[9px] font-bold uppercase tracking-[0.4em]">
+                        <span className="flex items-center gap-2 text-gray-600"><div className="w-1.5 h-1.5 rounded-full bg-red-500/30"/> Limited Seats</span>
+                        <span className="flex items-center gap-2 text-accent/60"><div className="w-1.5 h-1.5 rounded-full bg-accent/40"/> Prime Selection</span>
                       </div>
                     </div>
                     
-                    <div className="p-6 flex flex-wrap gap-4">
+                    <div className="px-10 py-10 flex flex-wrap gap-6">
                       {theatreShows.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()).map(show => (
-                        <div 
+                        <button 
                           key={show.id}
                           onClick={() => navigate(`/shows/${show.id}/seats`)}
-                          className="group relative"
+                          className="group relative flex flex-col items-center bg-white/5 border border-white/10 rounded-3xl p-6 min-w-[150px] hover:bg-accent hover:border-accent transition-all duration-300 transform hover:-translate-y-1 shadow-lg"
                         >
-                          <button className="px-6 py-3 bg-transparent border border-white/10 rounded-xl text-accent font-bold text-lg hover:bg-accent hover:text-[#070b0a] hover:border-accent transition-all min-w-[120px]">
+                          <span className="text-3xl font-cinematic text-white group-hover:text-[#070b0a] transition-colors mb-2">
                             {new Date(show.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </button>
-                          <div className="mt-2 text-center">
-                            <span className="text-[11px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-                               ₹{show.price}
-                            </span>
-                          </div>
-                        </div>
+                          </span>
+                          <span className="text-[10px] font-bold text-accent group-hover:text-[#070b0a]/60 uppercase tracking-[0.2em] transition-colors">
+                             ₹{show.price}
+                          </span>
+                        </button>
                       ))}
                     </div>
                   </div>

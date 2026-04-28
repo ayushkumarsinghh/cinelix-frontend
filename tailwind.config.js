@@ -10,6 +10,7 @@ export default {
         inter: ['Inter', 'sans-serif'],
         jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
         instrument: ['"Instrument Serif"', 'serif'],
+        cinematic: ['"Playfair Display"', 'serif'],
       },
       colors: {
         primary: {
@@ -17,7 +18,7 @@ export default {
           hover: '#C10712',
         },
         accent: {
-          DEFAULT: '#5ed29c',
+          DEFAULT: '#D4AF37', // Premium Gold
           dark: '#070b0a'
         },
         surface: {

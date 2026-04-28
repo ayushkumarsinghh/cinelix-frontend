@@ -17,6 +17,7 @@ interface Booking {
     movie: {
       title: string;
       imageUrl?: string;
+      duration: number;
     };
   };
   seats: {
@@ -218,16 +219,41 @@ const MyBookings = () => {
               </div>
 
               <div className="p-8 pt-6 flex flex-col items-center">
-                <div className="p-4 bg-white rounded-3xl mb-6 shadow-lg">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/verify/${selectedBooking.id}`} 
-                    alt="Booking QR Code"
-                    className="w-48 h-48"
-                  />
-                </div>
-                <p className="text-center text-xs text-gray-500 max-w-[200px]">
-                  Scan this code at the cinema entrance to enter the theatre.
-                </p>
+                {(() => {
+                  const startTime = new Date(selectedBooking.show.startTime).getTime();
+                  const durationMs = selectedBooking.show.movie.duration * 60 * 1000;
+                  const endTime = startTime + durationMs;
+                  const isCompleted = Date.now() > endTime;
+
+                  if (isCompleted) {
+                    return (
+                      <div className="flex flex-col items-center py-6">
+                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                          <X className="w-10 h-10 text-red-500" />
+                        </div>
+                        <p className="text-red-500 font-bold mb-1">Show Completed</p>
+                        <p className="text-gray-500 text-xs text-center px-8">
+                          This ticket is no longer valid as the show has ended.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <>
+                      <div className="p-4 bg-white rounded-3xl mb-6 shadow-lg">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${window.location.origin}/verify/${selectedBooking.id}`} 
+                          alt="Booking QR Code"
+                          className="w-48 h-48"
+                        />
+                      </div>
+                      <p className="text-center text-xs text-gray-500 max-w-[200px]">
+                        Scan this code at the cinema entrance to enter the theatre.
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
               
               <div className="bg-primary p-4 text-center">

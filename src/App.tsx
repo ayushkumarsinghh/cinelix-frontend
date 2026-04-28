@@ -11,6 +11,8 @@ import MyBookings from './pages/MyBookings';
 import AdminDashboard from './pages/AdminDashboard';
 import VerifyTicket from './pages/VerifyTicket';
 import Offers from './pages/Offers';
+import Plans from './pages/Plans';
+import Profile from './pages/Profile';
 
 import Navbar from './components/Navbar';
 import axios from 'axios';
@@ -51,6 +53,8 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/verify/:id" element={<VerifyTicket />} />
           <Route path="/offers" element={<Offers />} />
+          <Route path="/plans" element={<Plans />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/" element={<Navigate to="/movies" replace />} />
         </Routes>
       </div>

@@ -87,18 +87,38 @@ const VerifyTicket = () => {
               booking.isUsed ? 'border-yellow-500/50' : 'border-white/10'
             }`}
           >
-            {/* Header Status */}
-            <div className={`${booking.isUsed ? 'bg-yellow-500/10' : 'bg-green-500/10'} p-8 text-center border-b border-white/5`}>
-              <div className={`w-16 h-16 ${booking.isUsed ? 'bg-yellow-500/20' : 'bg-green-500/20'} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                {booking.isUsed ? <XCircle className="w-8 h-8 text-yellow-500" /> : <CheckCircle2 className="w-8 h-8 text-green-500" />}
-              </div>
-              <h1 className="text-2xl font-black text-white uppercase tracking-wider">
-                {booking.isUsed ? 'Ticket Void' : 'Ticket Verified'}
-              </h1>
-              <p className={`${booking.isUsed ? 'text-yellow-500/80' : 'text-green-500/80'} text-sm font-bold uppercase tracking-[0.2em] mt-1`}>
-                {booking.isUsed ? 'Already Checked-In' : 'Authentic Access'}
-              </p>
-            </div>
+            {(() => {
+              const startTime = new Date(booking.show.startTime).getTime();
+              const durationMs = booking.show.movie.duration * 60 * 1000;
+              const endTime = startTime + durationMs;
+              const isCompleted = Date.now() > endTime;
+
+              if (isCompleted) {
+                return (
+                  <div className="bg-red-500/10 p-8 text-center border-b border-white/5">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <XCircle className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h1 className="text-2xl font-black text-white uppercase tracking-wider">Show Ended</h1>
+                    <p className="text-red-500/80 text-sm font-bold uppercase tracking-[0.2em] mt-1">Ticket Expired</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className={`${booking.isUsed ? 'bg-yellow-500/10' : 'bg-green-500/10'} p-8 text-center border-b border-white/5`}>
+                  <div className={`w-16 h-16 ${booking.isUsed ? 'bg-yellow-500/20' : 'bg-green-500/20'} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                    {booking.isUsed ? <XCircle className="w-8 h-8 text-yellow-500" /> : <CheckCircle2 className="w-8 h-8 text-green-500" />}
+                  </div>
+                  <h1 className="text-2xl font-black text-white uppercase tracking-wider">
+                    {booking.isUsed ? 'Ticket Void' : 'Ticket Verified'}
+                  </h1>
+                  <p className={`${booking.isUsed ? 'text-yellow-500/80' : 'text-green-500/80'} text-sm font-bold uppercase tracking-[0.2em] mt-1`}>
+                    {booking.isUsed ? 'Already Checked-In' : 'Authentic Access'}
+                  </p>
+                </div>
+              );
+            })()}
 
             <div className="p-10">
               {/* Movie Info */}
@@ -158,18 +178,37 @@ const VerifyTicket = () => {
               </div>
 
               {/* Action Button */}
-              {!booking.isUsed ? (
-                <button 
-                  onClick={handleRedeem}
-                  className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 transform hover:scale-[1.02] active:scale-[0.98] mb-6"
-                >
-                  Confirm Check-In
-                </button>
-              ) : (
-                <div className="w-full bg-white/5 text-gray-500 py-4 rounded-2xl font-bold text-center border border-white/5 mb-6">
-                  Check-In Completed
-                </div>
-              )}
+              {(() => {
+                const startTime = new Date(booking.show.startTime).getTime();
+                const durationMs = booking.show.movie.duration * 60 * 1000;
+                const endTime = startTime + durationMs;
+                const isCompleted = Date.now() > endTime;
+
+                if (isCompleted) {
+                  return (
+                    <div className="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold text-center border border-red-500/10 mb-6">
+                      Show Completed - Access Denied
+                    </div>
+                  );
+                }
+
+                if (!booking.isUsed) {
+                  return (
+                    <button 
+                      onClick={handleRedeem}
+                      className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 transform hover:scale-[1.02] active:scale-[0.98] mb-6"
+                    >
+                      Confirm Check-In
+                    </button>
+                  );
+                }
+
+                return (
+                  <div className="w-full bg-white/5 text-gray-500 py-4 rounded-2xl font-bold text-center border border-white/5 mb-6">
+                    Check-In Completed
+                  </div>
+                );
+              })()}
 
               {/* User Info */}
               <div className="bg-white/5 rounded-3xl p-6 border border-white/5">
