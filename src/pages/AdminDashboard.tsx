@@ -147,11 +147,15 @@ const AdminDashboard = () => {
         }
       }
       
+      // 4. Force repair missing seats for all theatres
+      await axios.post('/api/theatres/fix-seats', {}, { headers });
+      
       if (syncedCount > 0) {
-        setMessage(`Successfully synced ${syncedCount} theatres!`);
+        setMessage(`Successfully synced ${syncedCount} theatres and initialized layouts!`);
         fetchData();
       } else {
-        setMessage('All theatres are already synced.');
+        setMessage('All theatres are synced and seat layouts verified.');
+        fetchData();
       }
     } catch (err) {
       setError('Error syncing theatres.');
@@ -238,6 +242,46 @@ const AdminDashboard = () => {
       fetchData();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to add show.');
+    }
+  };
+
+  const handleGenerateSampleShows = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      if (movies.length === 0 || theatres.length === 0) {
+        setError('Please sync movies and theatres first.');
+        return;
+      }
+
+      // We'll generate 4 shows for the first 3 movies in each theatre for today
+      let createdCount = 0;
+      const today = new Date().toISOString().split('T')[0];
+      
+      for (const theatre of theatres) {
+        const movieSubset = movies.slice(0, 3);
+        let currentHour = 10;
+        
+        for (const movie of movieSubset) {
+          const showData = {
+            movieId: movie.id,
+            theatreId: theatre.id,
+            startTime: `${today}T${currentHour.toString().padStart(2, '0')}:00:00Z`
+          };
+          await axios.post('/api/shows', showData, { headers });
+          createdCount++;
+          currentHour += 4; // Space them out
+        }
+      }
+      
+      setMessage(`Successfully generated ${createdCount} sample shows for today!`);
+      fetchData();
+    } catch (err) {
+      setError('Error generating sample shows.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -567,7 +611,17 @@ const AdminDashboard = () => {
             {activeTab === 'shows' && (
               <div className="space-y-10 animate-fade-in">
                 <div className="bg-[#111815] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                  <h2 className="text-xl font-bold text-white uppercase tracking-wider">Schedule New Show</h2>
+                  <h2 className="text-xl font-bold text-white uppercase tracking-wider mb-8">Schedule New Show</h2>
+                  <div className="flex gap-4 mb-10">
+                    <button 
+                      onClick={handleGenerateSampleShows}
+                      disabled={isLoading}
+                      className="bg-accent/10 border border-accent/20 text-accent px-8 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-accent hover:text-[#070b0a] transition-all flex items-center gap-2"
+                    >
+                      <Sparkles className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                      Generate Sample Shows (Today)
+                    </button>
+                  </div>
                   <form onSubmit={handleAddShow} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Select Movie</label>
@@ -695,6 +749,18 @@ const AdminDashboard = () => {
                   </form>
                 </div>
 
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.3em] italic">Theatre Directory</h3>
+                  <button 
+                    onClick={handleSyncTheatres}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest hover:bg-accent hover:text-[#070b0a] transition-all disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                    Sync Major Cities
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4">
                   {isLoading ? (
                     <div className="flex justify-center py-12"><Loader2 className="animate-spin w-10 h-10 text-accent" /></div>
@@ -707,7 +773,7 @@ const AdminDashboard = () => {
                           </div>
                           <div>
                             <h3 className="font-black text-white text-lg uppercase italic tracking-tight">{theatre.name}</h3>
-                            <p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">{theatre.location} • {theatre._count?.shows || 0} SHOWS ACTIVE</p>
+                            <p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">{theatre.location} • {theatre._count?.shows || 0} SHOWS ACTIVE • {theatre._count?.seats || 0} SEATS</p>
                           </div>
                         </div>
                         <button 
