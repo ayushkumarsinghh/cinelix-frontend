@@ -7,7 +7,8 @@ import { twMerge } from 'tailwind-merge';
 
 import { io } from 'socket.io-client';
 
-const socket = io(window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin);
+const socketUrl = import.meta.env.VITE_API_URL || (window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin);
+const socket = io(socketUrl);
 
 function cn(...inputs: any[]) {
   return twMerge(clsx(inputs));
