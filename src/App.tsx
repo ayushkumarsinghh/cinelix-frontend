@@ -10,12 +10,16 @@ import Checkout from './pages/Checkout';
 import MyBookings from './pages/MyBookings';
 import AdminDashboard from './pages/AdminDashboard';
 import VerifyTicket from './pages/VerifyTicket';
+import Offers from './pages/Offers';
 
 import Navbar from './components/Navbar';
 import axios from 'axios';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+  // Set base URL for API requests. In production, this points to your deployed backend.
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
@@ -35,7 +39,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-black pt-16">
+      <div className="min-h-screen bg-[#070b0a]">
         <Navbar />
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -46,6 +50,7 @@ function App() {
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/verify/:id" element={<VerifyTicket />} />
+          <Route path="/offers" element={<Offers />} />
           <Route path="/" element={<Navigate to="/movies" replace />} />
         </Routes>
       </div>
