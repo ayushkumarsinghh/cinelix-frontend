@@ -60,40 +60,8 @@ const MovieShows = () => {
         
         // If no shows are returned for future dates, we generate smart showtimes
         // that follow the "no overlap + 15 min break" rule.
-        if (fetchedShows.length === 0 || fetchedShows.length < 5) {
-          const duration = movieRes.data.duration || 145;
-          const breakTime = 15;
-          const slots: Show[] = [];
-          
-          // Let's generate for 3 different theatres
-          const mockTheatres = [
-            { id: 't1', name: 'PVR: ICON, Phoenix Palladium', location: 'Mumbai' },
-            { id: 't2', name: 'Inox: Insignia, Atria Mall', location: 'Mumbai' },
-            { id: 't3', name: 'Cinepolis: VIP, Seawoods Grand Central', location: 'Navi Mumbai' }
-          ];
-
-          mockTheatres.forEach(theatre => {
-            let currentTime = new Date(`${selectedDate}T10:00:00`);
-            const endTime = new Date(`${selectedDate}T23:59:59`);
-
-            while (currentTime < endTime) {
-              slots.push({
-                id: `${theatre.id}-${currentTime.getTime()}`,
-                startTime: currentTime.toISOString(),
-                price: 250 + (Math.floor(Math.random() * 5) * 50),
-                theatreId: theatre.id,
-                theatre: theatre
-              });
-              
-              // Move to next slot: Duration + 15 min break
-              currentTime = new Date(currentTime.getTime() + (duration + breakTime) * 60000);
-              // Round to nearest 5 mins for cleaner times
-              const minutes = currentTime.getMinutes();
-              currentTime.setMinutes(minutes + (5 - (minutes % 5)) % 5);
-            }
-          });
-          
-          fetchedShows = slots;
+        if (fetchedShows.length === 0) {
+          fetchedShows = [];
         }
 
         if (theatreIdFilter) {
@@ -255,8 +223,10 @@ const MovieShows = () => {
                           <button className="px-6 py-3 bg-transparent border border-white/10 rounded-xl text-accent font-bold text-lg hover:bg-accent hover:text-[#070b0a] hover:border-accent transition-all min-w-[120px]">
                             {new Date(show.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </button>
-                          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                             ₹{show.price} • {movie?.duration || 145}m
+                          <div className="mt-2 text-center">
+                            <span className="text-[11px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+                               ₹{show.price}
+                            </span>
                           </div>
                         </div>
                       ))}
