@@ -40,7 +40,7 @@ const VerifyTicket = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#070b0a] flex flex-col items-center justify-center p-6">
         <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-gray-400 font-medium">Verifying Ticket Authenticity...</p>
       </div>
@@ -48,7 +48,7 @@ const VerifyTicket = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black py-20 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#070b0a] py-20 px-6 relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]"></div>
 
@@ -65,12 +65,12 @@ const VerifyTicket = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass p-10 rounded-[2.5rem] text-center border border-red-500/20"
+            className="glass p-10 rounded-[2.5rem] text-center border border-primary/20"
           >
-            <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <XCircle className="w-10 h-10 text-red-500" />
+            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <XCircle className="w-10 h-10 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Invalid Ticket</h1>
+            <h1 className="text-3xl font-cinematic text-white mb-2 tracking-tight">Invalid Ticket</h1>
             <p className="text-gray-400 mb-8">{error}</p>
             <button 
               onClick={() => navigate('/')}
@@ -84,7 +84,7 @@ const VerifyTicket = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className={`glass rounded-[3rem] overflow-hidden border shadow-2xl transition-all duration-500 ${
-              booking.isUsed ? 'border-yellow-500/50' : 'border-white/10'
+              booking.isUsed ? 'border-accent/50' : 'border-white/10'
             }`}
           >
             {(() => {
@@ -95,25 +95,25 @@ const VerifyTicket = () => {
 
               if (isCompleted) {
                 return (
-                  <div className="bg-red-500/10 p-8 text-center border-b border-white/5">
-                    <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <XCircle className="w-8 h-8 text-red-500" />
+                  <div className="bg-primary/10 p-8 text-center border-b border-white/5">
+                    <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <XCircle className="w-8 h-8 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-black text-white uppercase tracking-wider">Show Ended</h1>
-                    <p className="text-red-500/80 text-sm font-bold uppercase tracking-[0.2em] mt-1">Ticket Expired</p>
+                    <h1 className="text-3xl font-cinematic text-white uppercase tracking-wider">Show Ended</h1>
+                    <p className="text-primary/80 text-sm font-bold uppercase tracking-[0.2em] mt-1">Ticket Expired</p>
                   </div>
                 );
               }
 
               return (
-                <div className={`${booking.isUsed ? 'bg-yellow-500/10' : 'bg-green-500/10'} p-8 text-center border-b border-white/5`}>
-                  <div className={`w-16 h-16 ${booking.isUsed ? 'bg-yellow-500/20' : 'bg-green-500/20'} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                    {booking.isUsed ? <XCircle className="w-8 h-8 text-yellow-500" /> : <CheckCircle2 className="w-8 h-8 text-green-500" />}
+                <div className={`${booking.isUsed ? 'bg-accent/10' : 'bg-emerald-500/10'} p-8 text-center border-b border-white/5`}>
+                  <div className={`w-16 h-16 ${booking.isUsed ? 'bg-accent/20' : 'bg-emerald-500/20'} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                    {booking.isUsed ? <XCircle className="w-8 h-8 text-accent" /> : <CheckCircle2 className="w-8 h-8 text-emerald-500" />}
                   </div>
-                  <h1 className="text-2xl font-black text-white uppercase tracking-wider">
+                  <h1 className="text-3xl font-cinematic text-white uppercase tracking-wider">
                     {booking.isUsed ? 'Ticket Void' : 'Ticket Verified'}
                   </h1>
-                  <p className={`${booking.isUsed ? 'text-yellow-500/80' : 'text-green-500/80'} text-sm font-bold uppercase tracking-[0.2em] mt-1`}>
+                  <p className={`${booking.isUsed ? 'text-accent/80' : 'text-emerald-500/80'} text-sm font-bold uppercase tracking-[0.2em] mt-1`}>
                     {booking.isUsed ? 'Already Checked-In' : 'Authentic Access'}
                   </p>
                 </div>
@@ -131,11 +131,11 @@ const VerifyTicket = () => {
                   />
                 </div>
                 <div className="flex-1 py-2">
-                  <h2 className="text-2xl font-bold text-white mb-2">{booking.show.movie.title}</h2>
+                  <h2 className="text-2xl font-cinematic text-white mb-2">{booking.show.movie.title}</h2>
                   <div className="flex items-center gap-3 text-xs text-gray-500">
                     <span className="flex items-center gap-1"><Film className="w-3 h-3" /> {booking.show.movie.duration}m</span>
                     <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                      booking.isUsed ? 'bg-yellow-500/20 text-yellow-500' : 'bg-green-500/20 text-green-500'
+                      booking.isUsed ? 'bg-accent/20 text-accent' : 'bg-emerald-500/20 text-emerald-500'
                     }`}>
                       {booking.isUsed ? 'Redeemed' : 'Valid'}
                     </span>
@@ -186,7 +186,7 @@ const VerifyTicket = () => {
 
                 if (isCompleted) {
                   return (
-                    <div className="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold text-center border border-red-500/10 mb-6">
+                    <div className="w-full bg-primary/10 text-primary py-4 rounded-2xl font-bold text-center border border-primary/10 mb-6">
                       Show Completed - Access Denied
                     </div>
                   );
@@ -217,7 +217,7 @@ const VerifyTicket = () => {
               </div>
             </div>
 
-            <div className={`${booking.isUsed ? 'bg-yellow-500' : 'bg-primary'} p-4 text-center transition-colors`}>
+            <div className={`${booking.isUsed ? 'bg-accent' : 'bg-primary'} p-4 text-center transition-colors`}>
               <p className="text-[10px] font-black text-black uppercase tracking-[0.4em]">
                 {booking.isUsed ? 'Access Revoked' : 'Verified by Cinelix'}
               </p>
