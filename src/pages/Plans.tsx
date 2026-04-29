@@ -35,7 +35,7 @@ const Plans = () => {
       duration: "Year",
       description: "The ultimate membership for true cinephiles.",
       features: [
-        "Zero Booking Fees on All Tickets",
+        "Reduced Convenience Fees (₹12.50)",
         "48-Hour Early Pre-Booking Access",
         "Exclusive Premiere Invitations",
         "Fast-Track Cinema Entry",
@@ -164,7 +164,8 @@ const Plans = () => {
 
   return (
     <div className="min-h-screen bg-[#070b0a] pt-32 pb-20 px-4 relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-accent/5 blur-[150px] rounded-full -z-10" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
       
       <div className="max-w-7xl mx-auto text-center mb-24">
         <div className="flex items-center justify-center gap-3 mb-6">
@@ -198,7 +199,7 @@ const Plans = () => {
               <h3 className="text-4xl font-cinematic text-white mb-3">{plan.name}</h3>
               <p className="text-gray-500 text-sm mb-6 leading-relaxed">{plan.description}</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-cinematic text-white tracking-tighter">₹{plan.price}</span>
+                <h1 className="text-5xl font-cinematic text-white tracking-tight mb-2">₹{plan.price}</h1>
                 {plan.duration && <span className="text-gray-500 text-sm">/{plan.duration}</span>}
               </div>
             </div>
@@ -216,6 +217,11 @@ const Plans = () => {
 
             {plan.featured && (
               <div className="mb-8">
+                {error && (
+                  <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded-xl text-sm text-center font-medium animate-shake mb-4">
+                    {error}
+                  </div>
+                )}
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input 
                     type="checkbox" 
@@ -230,7 +236,7 @@ const Plans = () => {
                     I agree to the Terms & Conditions
                   </span>
                 </label>
-                {error && <p className="text-red-500 text-[10px] font-bold mt-3 uppercase tracking-wider ml-1">{error}</p>}
+                {error && <p className="text-primary text-[10px] font-bold mt-3 uppercase tracking-wider ml-1">{error}</p>}
               </div>
             )}
 
