@@ -13,6 +13,7 @@ interface Movie {
   duration: number;
   genre?: string;
   imageUrl?: string;
+  backdropUrl?: string;
   trailerUrl?: string;
 }
 
@@ -31,53 +32,17 @@ const Movies = () => {
 
   const isPremium = localStorage.getItem('isPremium') === 'true';
 
-  const carouselSlides = [
-    {
-      id: 1,
-      title: "DUNE: PART TWO",
-      subtitle: "The desert journey continues in this cinematic masterpiece.",
-      buttonText: "Book Premiere Seats",
-      image: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?q=80&w=2070",
-      color: "from-accent/90"
-    },
-    {
-      id: 2,
-      title: "OPPENHEIMER",
-      subtitle: "The world changes forever. Experience Christopher Nolan's epic.",
-      buttonText: "Watch Trailer",
-      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070",
-      color: "from-blue-600/80"
-    },
-    ...(isPremium ? [
-      {
-        id: 4,
-        title: "THE PREMIERE CLUB",
-        subtitle: "Your early access window is now open for this week's blockbusters.",
-        buttonText: "Exclusive Access",
-        image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070",
-        color: "from-accent/90"
-      }
-    ] : [
-      {
-        id: 3,
-        title: "EARN REWARDS",
-        subtitle: "Get 20% back on your first 3 bookings. Join Cinelix+ today.",
-        buttonText: "Join Cinelix+",
-        image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070",
-        color: "from-purple-600/80"
-      }
-    ])
-  ];
+  // Select a random movie for the premium banner
+  const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
+
+  useEffect(() => {
+    if (isPremium && movies.length > 0) {
+      const randomMovie = movies[Math.floor(Math.random() * movies.length)];
+      setFeaturedMovie(randomMovie);
+    }
+  }, [isPremium, movies]);
 
   const genres = ['All', 'Action', 'Adventure', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller'];
-
-  // Auto-play carousel
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Sync search query from URL
   useEffect(() => {
@@ -91,15 +56,27 @@ const Movies = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [moviesRes, theatresRes] = await Promise.all([
+        const [moviesRes, theatresRes, showsRes] = await Promise.all([
           axios.get('/api/movies'),
-          axios.get('/api/theatres')
+          axios.get('/api/theatres'),
+          axios.get('/api/shows')
         ]);
-        setMovies(moviesRes.data);
+        
+        const now = new Date();
+        // Filter movies that have at least one FUTURE show
+        const activeMovieIds = new Set(
+          showsRes.data
+            .filter((s: any) => new Date(s.startTime) > now)
+            .map((s: any) => s.movieId)
+        );
+        
+        const activeMovies = moviesRes.data.filter((m: any) => activeMovieIds.has(m.id));
+        
+        setMovies(activeMovies);
         setTheatres(theatresRes.data);
       } catch (err) {
         console.error('Error fetching data:', err);
-        setMovies([]); // Don't show mock data anymore
+        setMovies([]); 
       } finally {
         setIsLoading(false);
       }
@@ -132,68 +109,86 @@ const Movies = () => {
 
   return (
     <div className="pb-20">
-      {/* Promo Banner Carousel */}
+      {/* Promo Banner Section */}
       <div className="w-full bg-[#070b0a] pt-8 pb-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="relative w-full h-[200px] md:h-[320px] rounded-2xl overflow-hidden shadow-[0_10px_50px_rgba(0,0,0,0.6)] cursor-pointer group">
-            <AnimatePresence mode='wait'>
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0"
-              >
-                <img 
-                  src={carouselSlides[currentSlide].image} 
-                  alt={carouselSlides[currentSlide].title} 
-                  className="w-full h-full object-cover scale-105"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/40 to-transparent flex items-center px-10 md:px-24`}>
-                  <div className="text-white max-w-2xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-[2px] bg-accent"></div>
-                      <span className="text-xs font-black uppercase tracking-[0.5em] text-accent">Trending Premiere</span>
-                    </div>
-                    <h2 className="text-4xl md:text-6xl font-cinematic mb-4 tracking-tight leading-none">{carouselSlides[currentSlide].title}</h2>
-                    <p className="text-base md:text-lg font-light mb-8 text-gray-300 max-w-lg leading-relaxed">{carouselSlides[currentSlide].subtitle}</p>
-                    <div className="flex items-center gap-6">
-                      <button className="bg-accent text-[#070b0a] hover:bg-white transition-all px-8 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-[10px] shadow-2xl flex items-center gap-3 group">
-                        {carouselSlides[currentSlide].buttonText}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
+          {!isPremium ? (
+            /* NON-PREMIUM: SUBSCRIBE PROMO */
+            <div className="relative w-full h-[200px] md:h-[320px] rounded-3xl overflow-hidden shadow-[0_10px_50px_rgba(0,0,0,0.6)] border border-white/5 group">
+              <img 
+                src="https://images.unsplash.com/photo-1574267432553-4b202f720e6e?q=80&w=2070" 
+                alt="Subscribe" 
+                className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/80 to-transparent flex items-center px-10 md:px-24">
+                <div className="max-w-xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-[2px] bg-accent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent animate-pulse">Unlock Everything</span>
                   </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-            <div className="absolute bottom-10 right-10 flex items-center gap-4 z-10">
-              <div className="flex gap-2">
-                {carouselSlides.map((_, i) => (
+                  <h2 className="text-4xl md:text-5xl font-cinematic text-white mb-4 tracking-tighter leading-none">
+                    JOIN <span className="text-accent italic">CINELIX+</span>
+                  </h2>
+                  <p className="text-sm md:text-base text-gray-300 font-light mb-6 leading-relaxed max-w-md">
+                    Get unlimited access to premium premieres, exclusive rewards, and zero convenience fees.
+                  </p>
                   <button 
-                    key={i}
-                    onClick={() => setCurrentSlide(i)}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${currentSlide === i ? 'bg-accent w-10' : 'bg-white/20 w-4'}`}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-2 ml-4 border-l border-white/10 pl-4">
-                 <button 
-                   onClick={() => setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
-                   className="w-10 h-10 rounded-xl bg-white/5 hover:bg-accent hover:text-[#070b0a] transition-all flex items-center justify-center border border-white/10"
-                 >
-                   <ChevronRight className="w-5 h-5 rotate-180" />
-                 </button>
-                 <button 
-                   onClick={() => setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)}
-                   className="w-10 h-10 rounded-xl bg-white/5 hover:bg-accent hover:text-[#070b0a] transition-all flex items-center justify-center border border-white/10"
-                 >
-                   <ChevronRight className="w-5 h-5" />
-                 </button>
+                    onClick={() => navigate('/plans')}
+                    className="bg-accent text-[#070b0a] hover:bg-white transition-all px-8 py-3.5 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-accent/20 flex items-center gap-3 group/btn"
+                  >
+                    Subscribe Now
+                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          ) : featuredMovie ? (
+            /* PREMIUM: FEATURED MOVIE SPOTLIGHT */
+            <div className="relative w-full h-[200px] md:h-[320px] rounded-3xl overflow-hidden shadow-[0_10px_50px_rgba(0,0,0,0.6)] border border-white/5 group">
+              <img 
+                src={featuredMovie.backdropUrl || featuredMovie.imageUrl?.replace('/w500/', '/original/')} 
+                alt={featuredMovie.title} 
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#070b0a] via-[#070b0a]/60 to-transparent flex items-center px-10 md:px-24">
+                <div className="max-w-2xl text-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-[2px] bg-accent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent">Member Exclusive</span>
+                  </div>
+                  <h2 className="text-4xl md:text-6xl font-cinematic mb-4 tracking-tighter leading-none group-hover:text-accent transition-colors">
+                    {featuredMovie.title}
+                  </h2>
+                  <div className="flex items-center gap-6 mb-6">
+                    <span className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-white/10">
+                      {featuredMovie.duration} MINS
+                    </span>
+                    <span className="text-gray-400 font-bold text-xs tracking-wide">
+                      {featuredMovie.genre}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button 
+                      onClick={() => navigate(`/movies/${featuredMovie.id}/shows`)}
+                      className="bg-accent text-[#070b0a] hover:bg-white transition-all px-8 py-3.5 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl flex items-center gap-3"
+                    >
+                      Book Seat
+                      <Calendar className="w-4 h-4" />
+                    </button>
+                    {featuredMovie.trailerUrl && (
+                      <button 
+                        onClick={() => setSelectedTrailer(featuredMovie.trailerUrl!)}
+                        className="bg-white/10 hover:bg-white text-white hover:text-[#070b0a] transition-all px-8 py-3.5 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] backdrop-blur-md border border-white/10 flex items-center gap-3"
+                      >
+                        Trailer
+                        <Play className="w-4 h-4 fill-current" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
       {/* Banner Section End */}
@@ -275,51 +270,51 @@ const Movies = () => {
         {filteredMovies.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-16">
             {filteredMovies.map((movie, index) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                key={movie.id}
-                className="group flex flex-col cursor-pointer"
-                onClick={() => navigate(`/movies/${movie.id}/shows${selectedTheatre !== 'all' ? `?theatreId=${selectedTheatre}` : ''}`)}
-              >
-                <div className="relative aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-[#0a0f0c] shadow-2xl border border-white/5 group-hover:border-accent/40 transition-all duration-500">
-                  <img 
-                    src={movie.imageUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop"} 
-                    alt={movie.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent opacity-60"></div>
-                  
-                  <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    {movie.trailerUrl && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTrailer(movie.trailerUrl!);
-                        }}
-                        className="w-20 h-20 bg-white text-[#070b0a] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.4)]"
-                      >
-                        <Play className="w-8 h-8 ml-1 fill-current" />
-                      </button>
-                    )}
-                  </div>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    key={movie.id}
+                    className="group flex flex-col cursor-pointer"
+                    onClick={() => navigate(`/movies/${movie.id}/shows${selectedTheatre !== 'all' ? `?theatreId=${selectedTheatre}` : ''}`)}
+                  >
+                    <div className="relative aspect-[2/3] rounded-[2.5rem] overflow-hidden bg-[#0a0f0c] shadow-2xl border border-white/5 group-hover:border-accent/40 transition-all duration-500">
+                      <img 
+                        src={movie.imageUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop"} 
+                        alt={movie.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#070b0a] via-transparent to-transparent opacity-60"></div>
+                      
+                      <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                        {movie.trailerUrl && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTrailer(movie.trailerUrl!);
+                            }}
+                            className="w-20 h-20 bg-white text-[#070b0a] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.4)]"
+                          >
+                            <Play className="w-8 h-8 ml-1 fill-current" />
+                          </button>
+                        )}
+                      </div>
 
-                  <div className="absolute bottom-8 left-8 right-8">
-                    <span className="text-accent text-[10px] font-bold uppercase tracking-[0.3em] mb-4 inline-block">
-                      {movie.duration} Minutes
-                    </span>
-                    <h3 className="text-white font-cinematic text-3xl tracking-tight leading-none group-hover:text-accent transition-colors truncate">
-                      {movie.title}
-                    </h3>
-                  </div>
+                      <div className="absolute bottom-8 left-8 right-8">
+                        <span className="text-accent text-[10px] font-bold uppercase tracking-[0.3em] mb-4 inline-block">
+                          {movie.duration} Minutes
+                        </span>
+                        <h3 className="text-white font-cinematic text-3xl tracking-tight leading-none group-hover:text-accent transition-colors truncate">
+                          {movie.title}
+                        </h3>
+                      </div>
 
-                  <div className="absolute top-6 right-6 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-black text-white flex items-center gap-2 border border-white/10 shadow-lg opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                    <Star className="text-accent w-4 h-4 fill-accent" /> 8.5
-                  </div>
-                </div>
-              </motion.div>
+                      <div className="absolute top-6 right-6 bg-white/10 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-black text-white flex items-center gap-2 border border-white/10 shadow-lg opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
+                        <Star className="text-accent w-4 h-4 fill-accent" /> 8.5
+                      </div>
+                    </div>
+                  </motion.div>
             ))}
           </div>
         ) : (
