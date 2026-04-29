@@ -36,14 +36,14 @@ const Login = () => {
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
 
       <div className="w-full max-w-md glass p-10 rounded-[2.5rem] relative z-10 border border-white/10 shadow-2xl">
         <div className="flex flex-col items-center mb-10">
           <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-primary/40 transform -rotate-6">
             <Film className="text-white w-10 h-10" />
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">
+          <h1 className="text-5xl font-cinematic text-white tracking-tight mb-2">
             {isRegister ? 'Join Cinelix' : 'Welcome Back'}
           </h1>
           <p className="text-gray-400 text-center">
@@ -54,7 +54,7 @@ const Login = () => {
         <div className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm text-center font-medium animate-shake">
+              <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded-xl text-sm text-center font-medium animate-shake">
                 {error}
               </div>
             )}
