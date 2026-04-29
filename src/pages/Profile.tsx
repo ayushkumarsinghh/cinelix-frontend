@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Lock, Calendar, Star, Ticket, ChevronRight, Shield, Bell, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Lock, Calendar, Star, Ticket, ChevronRight, Shield, Bell, Loader2, CheckCircle2, AlertCircle, Gift } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
@@ -106,8 +106,23 @@ const Profile = () => {
               <User className="w-12 h-12 text-[#070b0a]" />
             </div>
             <div>
-              <h1 className="text-4xl font-cinematic text-white mb-2">{user?.email.split('@')[0]}</h1>
-              <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">{user?.email}</p>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-4xl font-cinematic text-white">{user?.email.split('@')[0]}</h1>
+                {user?.isPremium && (
+                  <span className="bg-accent text-[#070b0a] text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-tighter italic">
+                    Cinelix +
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">{user?.email}</p>
+                <button 
+                  onClick={fetchProfile}
+                  className="text-[10px] font-bold text-accent/60 hover:text-accent uppercase tracking-widest transition-all"
+                >
+                  Sync Status
+                </button>
+              </div>
             </div>
           </div>
           
@@ -122,7 +137,7 @@ const Profile = () => {
               </div>
               <button 
                 onClick={handleCancelMembership}
-                className="text-[9px] font-bold text-red-500/50 hover:text-red-500 uppercase tracking-[0.2em] transition-colors mr-2"
+                className="text-[9px] font-bold text-primary/50 hover:text-primary uppercase tracking-[0.2em] transition-colors mr-2"
               >
                 End Membership
               </button>
@@ -169,15 +184,26 @@ const Profile = () => {
             </div>
 
             {user?.isPremium && (
-              <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-3xl">
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-8">Active Benefits</h3>
-                <div className="space-y-4">
-                  {['Zero Booking Fees', 'Early Access', 'Concierge Support'].map(benefit => (
-                    <div key={benefit} className="flex items-center gap-3 text-gray-400">
-                      <CheckCircle2 className="w-4 h-4 text-accent/60" />
-                      <span className="text-xs font-medium">{benefit}</span>
-                    </div>
-                  ))}
+              <div className="space-y-8">
+                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-3xl">
+                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-8">Active Benefits</h3>
+                  <div className="space-y-4">
+                    {['Reduced Convenience Fees (₹12.50)', 'Early Access', 'Concierge Support', 'Premium Lounge Access'].map(benefit => (
+                      <div key={benefit} className="flex items-center gap-3 text-gray-400">
+                        <CheckCircle2 className="w-4 h-4 text-accent/60" />
+                        <span className="text-xs font-medium">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 rounded-[2.5rem] p-10 backdrop-blur-3xl">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Cinelix Wallet</h3>
+                    <Gift className="w-5 h-5 text-accent" />
+                  </div>
+                  <p className="text-3xl font-cinematic text-white mb-2">₹{user?.walletBalance?.toFixed(2) || '0.00'}</p>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Available Credits</p>
                 </div>
               </div>
             )}
@@ -201,7 +227,7 @@ const Profile = () => {
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-4 rounded-2xl flex items-center gap-3 ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+                    className={`p-4 rounded-2xl flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20'}`}
                   >
                     {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     <span className="text-sm font-medium">{message.text}</span>
