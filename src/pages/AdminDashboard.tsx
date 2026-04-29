@@ -30,6 +30,7 @@ const AdminDashboard = () => {
     genre: '',
     description: '',
     imageUrl: '',
+    backdropUrl: '',
     trailerUrl: ''
   });
 
@@ -90,75 +91,45 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSyncMovies = async () => {
+  const handleGenerateSchedule = async () => {
     setIsLoading(true);
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     try {
-      let syncedCount = 0;
-      for (const movie of recentMovies) {
-        const exists = movies.find(m => m.title.toLowerCase() === movie.title.toLowerCase());
-        if (!exists) {
-          await axios.post('/api/movies', {
-            title: movie.title,
-            duration: movie.duration,
-            genre: movie.genre,
-            imageUrl: movie.imageUrl,
-            description: movie.description || "Exciting blockbuster movie now showing at Cinelix.",
-            trailerUrl: movie.trailerUrl || ""
-          }, { headers });
-          syncedCount++;
+      if (movies.length === 0 || theatres.length === 0) {
+        setError('Add movies and theatres first!');
+        return;
+      }
+
+      const showTimes = [11, 15, 18, 21]; 
+      let createdCount = 0;
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        
+        for (const theatre of theatres) {
+          for (let j = 0; j < showTimes.length; j++) {
+            const hour = showTimes[j];
+            const movieIdx = (i + j + theatres.indexOf(theatre)) % movies.length;
+            const startTime = new Date(new Date(date).setHours(hour, 0, 0, 0));
+            
+            await axios.post('/api/shows', {
+              movieId: movies[movieIdx].id,
+              theatreId: theatre.id,
+              startTime: startTime.toISOString(),
+              price: hour >= 18 ? 450 : 300
+            }, { headers });
+            createdCount++;
+          }
         }
       }
-      
-      if (syncedCount > 0) {
-        setMessage(`Successfully synced ${syncedCount} new movies!`);
-        fetchData();
-      } else {
-        setMessage('All movies are already synced.');
-      }
-    } catch (err) {
-      console.error('Sync error:', err);
-      setError('Error syncing movies catalog.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleSyncTheatres = async () => {
-    setIsLoading(true);
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-    const defaultTheatres = [
-      { name: 'PVR Inox', location: 'Mumbai' },
-      { name: 'Cinepolis', location: 'Delhi-NCR' },
-      { name: 'IMAX Hub', location: 'Bengaluru' },
-      { name: 'Asian Cinemas', location: 'Hyderabad' },
-      { name: 'SPI Cinemas', location: 'Chennai' }
-    ];
-
-    try {
-      let syncedCount = 0;
-      for (const theatre of defaultTheatres) {
-        const exists = theatres.find(t => t.name === theatre.name && t.location === theatre.location);
-        if (!exists) {
-          await axios.post('/api/theatres', theatre, { headers });
-          syncedCount++;
-        }
-      }
-      
-      // 4. Force repair missing seats for all theatres
-      await axios.post('/api/theatres/fix-seats', {}, { headers });
-      
-      if (syncedCount > 0) {
-        setMessage(`Successfully synced ${syncedCount} theatres and initialized layouts!`);
-        fetchData();
-      } else {
-        setMessage('All theatres are synced and seat layouts verified.');
-        fetchData();
-      }
+      setMessage(`Generated ${createdCount} shows for the next 7 days!`);
+      fetchData();
     } catch (err) {
-      setError('Error syncing theatres.');
+      console.error('Schedule gen error:', err);
+      setError('Error generating schedule.');
     } finally {
       setIsLoading(false);
     }
@@ -205,7 +176,7 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage('Movie added successfully!');
-      setNewMovie({ title: '', duration: 120, genre: '', description: '', imageUrl: '', trailerUrl: '' });
+      setNewMovie({ title: '', duration: 120, genre: '', description: '', imageUrl: '', backdropUrl: '', trailerUrl: '' });
       fetchData();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to add movie.');
@@ -344,8 +315,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ zoom: 0.75 }}>
-      <div className="max-w-7xl mx-auto px-6 py-12 pb-32">
+    <div className="max-w-7xl mx-auto px-6 py-12 pb-32">
       <div className="flex items-center justify-between mb-12">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center">
@@ -407,7 +377,7 @@ const AdminDashboard = () => {
             </div>
           )}
           {error && (
-            <div className="p-5 bg-red-500 text-white rounded-2xl flex items-center gap-3 font-bold shadow-2xl shadow-red-500/20">
+            <div className="p-5 bg-primary text-white rounded-2xl flex items-center gap-3 font-bold shadow-2xl shadow-primary/20">
               <AlertCircle className="w-6 h-6 flex-shrink-0" />
               {error}
             </div>
@@ -448,7 +418,7 @@ const AdminDashboard = () => {
             {activeTab === 'movies' && (
               <div className="space-y-10 animate-fade-in">
                 <div className="bg-[#111815] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                  <h2 className="text-xl font-bold text-white uppercase tracking-wider">Register New Movie</h2>
+                  <h2 className="text-2xl font-cinematic text-white uppercase tracking-wider">Register New Movie</h2>
                   <form onSubmit={handleAddMovie} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Title</label>
@@ -483,12 +453,23 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Image URL</label>
+                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Poster URL (w500)</label>
                       <input 
                         type="text" 
                         required
                         value={newMovie.imageUrl}
                         onChange={e => setNewMovie({...newMovie, imageUrl: e.target.value})}
+                        className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium placeholder-gray-800 shadow-inner" 
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Backdrop URL (Original)</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={newMovie.backdropUrl || ''}
+                        onChange={e => setNewMovie({...newMovie, backdropUrl: e.target.value})}
                         className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium placeholder-gray-800 shadow-inner" 
                         placeholder="https://..."
                       />
@@ -524,14 +505,6 @@ const AdminDashboard = () => {
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.3em] italic">Current Inventory</h3>
-                  <button 
-                    onClick={handleSyncMovies}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest hover:bg-accent hover:text-[#070b0a] transition-all disabled:opacity-50"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
-                    Sync Premium Catalog
-                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -541,13 +514,7 @@ const AdminDashboard = () => {
                     <div className="bg-[#111815] p-12 rounded-[2.5rem] border border-white/5 border-dashed flex flex-col items-center justify-center text-center">
                       <Film className="w-16 h-16 text-gray-800 mb-6" />
                       <h4 className="text-xl font-bold text-white uppercase tracking-wider mb-2">No Movies Found</h4>
-                      <p className="text-gray-500 font-bold max-w-xs mb-8 text-sm">Your movie library is currently empty. Start by adding a movie manually or sync our premium catalog.</p>
-                      <button 
-                        onClick={handleSyncMovies}
-                        className="bg-white/5 hover:bg-accent hover:text-[#070b0a] text-white px-8 py-3 rounded-xl font-black transition-all text-xs uppercase tracking-widest border border-white/5"
-                      >
-                        Import Premium Catalog
-                      </button>
+                      <p className="text-gray-500 font-bold max-w-xs mb-8 text-sm">Your movie library is currently empty. Start by adding a movie manually using the form above.</p>
                     </div>
                   ) : (
                     movies.map(movie => (
@@ -570,7 +537,7 @@ const AdminDashboard = () => {
                             </button>
                             <button 
                               onClick={() => handleDeleteMovie(movie.id)}
-                              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-500 transition-all"
+                              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary transition-all"
                               title="Delete Movie"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -636,18 +603,9 @@ const AdminDashboard = () => {
 
             {activeTab === 'shows' && (
               <div className="space-y-10 animate-fade-in">
+                {/* Schedule New Show Form */}
                 <div className="bg-[#111815] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
                   <h2 className="text-xl font-bold text-white uppercase tracking-wider mb-8">Schedule New Show</h2>
-                  <div className="flex gap-4 mb-10">
-                    <button 
-                      onClick={handleGenerateSampleShows}
-                      disabled={isLoading}
-                      className="bg-accent/10 border border-accent/20 text-accent px-8 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-accent hover:text-[#070b0a] transition-all flex items-center gap-2"
-                    >
-                      <Sparkles className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                      Generate Sample Shows (Today)
-                    </button>
-                  </div>
                   <form onSubmit={handleAddShow} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Select Movie</label>
@@ -680,7 +638,8 @@ const AdminDashboard = () => {
                         required
                         value={newShow.startTime}
                         onChange={e => setNewShow({...newShow, startTime: e.target.value})}
-                        className="w-full bg-[#070b0a] border border-white/5 rounded-xl py-4 px-5 text-white focus:outline-none focus:border-accent transition-all font-bold shadow-inner"
+                        onClick={(e) => (e.target as any).showPicker?.()}
+                        className="w-full bg-[#070b0a] border border-white/5 rounded-xl py-4 px-5 text-white focus:outline-none focus:border-accent transition-all font-bold shadow-inner cursor-pointer"
                       />
                     </div>
                     <div className="col-span-2 flex justify-end mt-4">
@@ -691,18 +650,25 @@ const AdminDashboard = () => {
                   </form>
                 </div>
 
-                <div className="flex items-center justify-between mb-2">
-                   <h3 className="text-xs font-black text-gray-500 uppercase tracking-[0.3em]">Existing Schedule</h3>
-                   <select 
+                {/* Show Listings Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.3em] italic">Show Listings</h3>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Filter:</label>
+                    <select 
                       value={selectedTheatreFilter}
                       onChange={e => setSelectedTheatreFilter(e.target.value)}
-                      className="bg-transparent border-none text-accent text-xs font-black uppercase tracking-widest focus:outline-none cursor-pointer"
+                      className="bg-[#111815] border border-white/5 rounded-xl px-4 py-2 text-xs font-bold text-white focus:outline-none focus:border-accent"
                     >
                       <option value="all" className="bg-black">All Theatres</option>
                       {theatres.map(t => <option key={t.id} value={t.id} className="bg-black">{t.name}</option>)}
                     </select>
+                  </div>
                 </div>
 
+                {/* Show Cards */}
                 <div className="grid grid-cols-1 gap-4">
                   {isLoading ? (
                     <div className="flex justify-center py-12"><Loader2 className="animate-spin w-10 h-10 text-accent" /></div>
@@ -742,10 +708,12 @@ const AdminDashboard = () => {
             {activeTab === 'theatres' && (
               <div className="space-y-10 animate-fade-in">
                 <div className="bg-[#111815] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                  <h2 className="text-xl font-black text-white mb-8 flex items-center gap-3 uppercase italic tracking-wider">
-                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center"><MapPin className="w-5 h-5 text-accent" /></div>
-                    Add New Theatre
-                  </h2>
+                  <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-xl font-black text-white flex items-center gap-3 uppercase italic tracking-wider">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center"><MapPin className="w-5 h-5 text-accent" /></div>
+                      Add New Theatre
+                    </h2>
+                  </div>
                   <form onSubmit={handleAddTheatre} className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Theatre Name</label>
@@ -777,14 +745,6 @@ const AdminDashboard = () => {
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.3em] italic">Theatre Directory</h3>
-                  <button 
-                    onClick={handleSyncTheatres}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest hover:bg-accent hover:text-[#070b0a] transition-all disabled:opacity-50"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
-                    Sync Major Cities
-                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -804,7 +764,7 @@ const AdminDashboard = () => {
                         </div>
                         <button 
                           onClick={() => handleDeleteTheatre(theatre.id)}
-                          className="w-12 h-12 rounded-xl bg-red-500/5 flex items-center justify-center text-gray-500 hover:text-red-500 transition-all"
+                          className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-gray-500 hover:text-primary transition-all"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
@@ -868,42 +828,41 @@ const AdminDashboard = () => {
                   <p className="text-gray-500 font-black uppercase tracking-widest">No physical layout found</p>
                 </div>
               ) : (
-                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].map((rowLabel) => {
-                  const rowSeats = showSeats.filter((s: any) => s.row === rowLabel);
-                  
-                  if (rowSeats.length === 0) {
-                    return <div key={rowLabel} className="h-12 w-full" />;
-                  }
-
-                  return (
-                    <div key={rowLabel} className="flex items-center gap-10">
-                      <span className="w-8 text-sm text-gray-700 font-black italic">{rowLabel}</span>
-                      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
-                        {rowSeats.sort((a: any, b: any) => a.number - b.number).map((seat: any) => (
-                          <button
-                            key={seat.id}
-                            onClick={() => toggleSeatStatus(seat)}
-                            className={`
-                              group relative w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-500
-                              ${seat.isBooked 
-                                ? 'bg-red-500/10 border-2 border-red-500/30 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.15)]' 
-                                : 'bg-[#070b0a] border-2 border-white/5 text-gray-600 hover:border-accent hover:text-accent hover:shadow-[0_0_20px_rgba(94,210,156,0.2)]'}
-                            `}
-                          >
-                            <Armchair className={`w-5 h-5 ${seat.isBooked ? '' : 'group-hover:scale-110 transition-transform'}`} />
-                            <span className="text-[9px] font-black mt-1 uppercase italic tracking-tighter">{seat.seatNumber}</span>
-                            {seat.isBooked && (
-                              <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-[#111815] shadow-lg">
-                                 <X className="w-3 h-3" />
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      <span className="w-8 text-sm text-gray-700 font-black italic text-right">{rowLabel}</span>
+                Object.entries(
+                  showSeats.reduce((acc: any, seat: any) => {
+                    if (!acc[seat.row]) acc[seat.row] = [];
+                    acc[seat.row].push(seat);
+                    return acc;
+                  }, {})
+                ).map(([rowLabel, rowSeats]: [string, any]) => (
+                  <div key={rowLabel} className="flex items-center gap-10">
+                    <span className="w-8 text-sm text-gray-700 font-black italic">{rowLabel}</span>
+                    <div className="grid grid-cols-10 gap-4">
+                      {rowSeats.sort((a: any, b: any) => a.number - b.number).map((seat: any) => (
+                        <button
+                          key={seat.id}
+                          onClick={() => toggleSeatStatus(seat)}
+                          className={`
+                            group relative w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-500
+                            ${seat.isBooked 
+                              ? 'bg-primary/10 border-2 border-primary/30 text-primary shadow-[0_0_30px_rgba(229,9,20,0.15)]' 
+                              : 'bg-[#111815] border border-white/5 text-gray-600'
+                            }
+                          `}
+                        >
+                          <Armchair className="w-6 h-6" />
+                          <span className="text-[9px] font-black mt-1 uppercase italic tracking-tighter">{seat.seatNumber}</span>
+                          {seat.isBooked && (
+                            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center border-2 border-[#111815] shadow-lg">
+                               <X className="w-3 h-3" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
                     </div>
-                  );
-                })
+                    <span className="w-8 text-sm text-gray-700 font-black italic text-right">{rowLabel}</span>
+                  </div>
+                ))
               )}
             </div>
 
@@ -913,7 +872,7 @@ const AdminDashboard = () => {
                 <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Available</span>
               </div>
               <div className="flex items-center gap-4">
-                <div className="w-6 h-6 rounded-lg bg-red-500/20 border-2 border-red-500/40"></div>
+                <div className="w-6 h-6 rounded-lg bg-primary/20 border-2 border-primary/40"></div>
                 <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Sold / Blocked</span>
               </div>
               <div className="flex items-center gap-4">
@@ -938,10 +897,10 @@ const AdminDashboard = () => {
             initial={{ scale: 0.9, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 40 }}
-            className="relative w-full max-w-4xl bg-[#0a0f0d] rounded-[3.5rem] overflow-hidden border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] flex flex-col md:flex-row"
+            className="relative w-full max-w-5xl max-h-[90vh] bg-[#0a0f0d] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] flex flex-col md:flex-row"
           >
             {/* Left Side: Movie Poster Preview */}
-            <div className="w-full md:w-80 relative overflow-hidden hidden md:block">
+            <div className="w-full md:w-72 relative overflow-hidden hidden lg:block shrink-0">
               <img 
                 src={editingMovie.imageUrl || 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=2059&auto=format&fit=crop'} 
                 alt={editingMovie.title}
@@ -950,18 +909,18 @@ const AdminDashboard = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#0a0f0d]"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f0d] via-transparent to-transparent"></div>
               
-              <div className="absolute bottom-12 left-10 right-10">
-                <div className="flex items-center gap-3 mb-4">
+              <div className="absolute bottom-10 left-8 right-8">
+                <div className="flex items-center gap-3 mb-3">
                    <div className="w-1.5 h-1.5 bg-accent rounded-full shadow-[0_0_10px_rgba(212,175,55,0.8)]"></div>
-                   <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em]">Live Preview</span>
+                   <span className="text-[9px] font-bold text-accent uppercase tracking-[0.4em]">Live Preview</span>
                 </div>
-                <h3 className="text-3xl font-cinematic text-white leading-tight mb-3">{editingMovie.title || 'Untitled'}</h3>
-                <p className="text-[11px] text-gray-400 font-medium uppercase tracking-[0.2em]">{editingMovie.genre || 'Genre Not Set'}</p>
+                <h3 className="text-2xl font-cinematic text-white leading-tight mb-2">{editingMovie.title || 'Untitled'}</h3>
+                <p className="text-[10px] text-gray-400 font-medium uppercase tracking-[0.2em]">{editingMovie.genre || 'Genre Not Set'}</p>
               </div>
             </div>
 
-            <div className="flex-1 p-12 relative">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5">
+            <div className="flex-1 p-8 md:p-10 relative overflow-y-auto custom-scrollbar">
+              <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
@@ -971,88 +930,97 @@ const AdminDashboard = () => {
             
             <button 
               onClick={() => setEditingMovie(null)}
-              className="absolute top-8 right-8 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+              className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-all border border-white/5 z-10"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-5 mb-10">
-              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20">
-                <RefreshCw className="w-6 h-6 text-accent" />
+            <div className="flex items-center gap-5 mb-8">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0">
+                <RefreshCw className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h2 className="text-4xl font-cinematic text-white tracking-tight leading-none">Update <span className="text-accent italic">Movie Data</span></h2>
-                <p className="text-[10px] text-accent/60 font-bold uppercase tracking-[0.4em] mt-3">Curating the Cinematic Experience</p>
+                <h2 className="text-3xl font-cinematic text-white tracking-tight leading-none">Update <span className="text-accent italic">Movie Data</span></h2>
+                <p className="text-[9px] text-accent/60 font-bold uppercase tracking-[0.4em] mt-2">Curating the Cinematic Experience</p>
               </div>
             </div>
 
-            <form onSubmit={handleUpdateMovie} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Title</label>
+            <form onSubmit={handleUpdateMovie} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Title</label>
                 <input 
                   type="text" 
                   value={editingMovie.title}
                   onChange={e => setEditingMovie({...editingMovie, title: e.target.value})}
-                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
+                  className="w-full bg-[#050706] border border-white/5 rounded-xl py-3 px-5 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-inner placeholder-gray-800 text-sm" 
                   placeholder="Cinematic Title"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Genre</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Genre</label>
                 <input 
                   type="text" 
                   value={editingMovie.genre}
                   onChange={e => setEditingMovie({...editingMovie, genre: e.target.value})}
-                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
+                  className="w-full bg-[#050706] border border-white/5 rounded-xl py-3 px-5 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-inner placeholder-gray-800 text-sm" 
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Duration (mins)</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Duration (mins)</label>
                 <input 
                   type="number" 
                   value={editingMovie.duration}
                   onChange={e => setEditingMovie({...editingMovie, duration: parseInt(e.target.value)})}
-                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
+                  className="w-full bg-[#050706] border border-white/5 rounded-xl py-3 px-5 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-inner placeholder-gray-800 text-sm" 
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Trailer URL</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Trailer URL</label>
                 <input 
                   type="text" 
                   value={editingMovie.trailerUrl || ''}
                   onChange={e => setEditingMovie({...editingMovie, trailerUrl: e.target.value})}
-                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-2xl placeholder-gray-800" 
+                  className="w-full bg-[#050706] border border-white/5 rounded-xl py-3 px-5 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold shadow-inner placeholder-gray-800 text-sm" 
                 />
               </div>
-              <div className="space-y-2 col-span-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Image URL</label>
+              <div className="space-y-1.5 col-span-2 md:col-span-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Poster URL (w500)</label>
                 <input 
                   type="text" 
                   value={editingMovie.imageUrl}
                   onChange={e => setEditingMovie({...editingMovie, imageUrl: e.target.value})}
-                  className="w-full bg-[#070b0a] border border-white/10 rounded-xl py-3 px-5 text-gray-200 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner" 
+                  className="w-full bg-[#070b0a] border border-white/5 rounded-xl py-3 px-5 text-gray-300 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner text-xs" 
                 />
               </div>
-              <div className="space-y-2 col-span-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Description</label>
+              <div className="space-y-1.5 col-span-2 md:col-span-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Backdrop URL (Original)</label>
+                <input 
+                  type="text" 
+                  value={editingMovie.backdropUrl || ''}
+                  onChange={e => setEditingMovie({...editingMovie, backdropUrl: e.target.value})}
+                  className="w-full bg-[#070b0a] border border-white/5 rounded-xl py-3 px-5 text-gray-300 focus:outline-none focus:border-accent focus:bg-[#0c1210] transition-all font-medium shadow-inner text-xs" 
+                />
+              </div>
+              <div className="space-y-1.5 col-span-2">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] ml-1">Description</label>
                 <textarea 
                   value={editingMovie.description}
                   onChange={e => setEditingMovie({...editingMovie, description: e.target.value})}
-                  className="w-full bg-[#050706] border-2 border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold h-32 shadow-2xl resize-none" 
+                  className="w-full bg-[#050706] border border-white/5 rounded-xl py-3 px-5 text-white focus:outline-none focus:border-accent focus:bg-black transition-all font-bold h-24 shadow-inner resize-none text-sm leading-relaxed" 
                   placeholder="Narrative summary of the movie..."
                 />
               </div>
-              <div className="col-span-2 flex justify-end gap-4 mt-8">
+              <div className="col-span-2 flex justify-end gap-4 mt-6">
                 <button 
                   type="button"
                   onClick={() => setEditingMovie(null)}
-                  className="px-8 py-3.5 rounded-xl font-black text-gray-500 hover:text-white transition-all uppercase tracking-widest text-[10px]"
+                  className="px-6 py-2 rounded-lg font-black text-gray-500 hover:text-white transition-all uppercase tracking-widest text-[9px]"
                 >
-                  Discard Changes
+                  Discard
                 </button>
                 <button 
                   type="submit"
-                  className="bg-accent hover:bg-white text-[#070b0a] px-16 py-5 rounded-full font-bold transition-all shadow-2xl uppercase tracking-[0.2em] text-xs transform hover:-translate-y-1 active:translate-y-0"
+                  className="bg-accent hover:bg-white text-[#070b0a] px-10 py-3.5 rounded-xl font-bold transition-all shadow-xl uppercase tracking-[0.2em] text-[10px]"
                 >
                   Apply Changes
                 </button>
@@ -1062,7 +1030,6 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
       )}
-      </div>
     </div>
   );
 };
