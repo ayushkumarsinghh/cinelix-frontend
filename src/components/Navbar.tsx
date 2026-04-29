@@ -94,7 +94,7 @@ const Navbar = () => {
                         <Link to="/admin" className="text-sm font-bold text-accent hover:text-white transition-colors text-left" onClick={() => setIsMenuOpen(false)}>Admin Console</Link>
                       )}
                       {isAuthenticated && (
-                        <button onClick={handleLogout} className="text-sm font-bold text-red-500/80 hover:text-red-500 transition-colors text-left">Logout Session</button>
+                        <button onClick={handleLogout} className="text-sm font-bold text-primary/80 hover:text-primary transition-colors text-left">Logout Session</button>
                       )}
                     </div>
                   </div>
