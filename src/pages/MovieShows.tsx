@@ -149,8 +149,8 @@ const MovieShows = () => {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <div className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-green-500/50"></div>
-                 Experience Excellence
+                  <div className="w-2 h-2 rounded-full bg-emerald-500/50"></div>
+                  Experience Excellence
               </div>
             </div>
           </div>
@@ -180,7 +180,7 @@ const MovieShows = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-16 flex flex-col md:flex-row gap-12">
         <div className="w-full md:w-2/3">
-          <h2 className="text-[22px] font-bold text-white mb-4">About the movie</h2>
+          <h2 className="text-3xl font-cinematic text-white mb-4 tracking-tight">About the movie</h2>
           <p className="text-gray-400 text-[15px] leading-relaxed mb-12">
             {movie?.description || 'An explosion of guns and roses, betrayal and trust, and, above all, love and loss. Discover the most anticipated cinematic event of the year.'}
           </p>
@@ -212,7 +212,7 @@ const MovieShows = () => {
                         </div>
                       </div>
                       <div className="hidden md:flex items-center gap-8 text-[9px] font-bold uppercase tracking-[0.4em]">
-                        <span className="flex items-center gap-2 text-gray-600"><div className="w-1.5 h-1.5 rounded-full bg-red-500/30"/> Limited Seats</span>
+                        <span className="flex items-center gap-2 text-gray-600"><div className="w-1.5 h-1.5 rounded-full bg-primary/30"/> Limited Seats</span>
                         <span className="flex items-center gap-2 text-accent/60"><div className="w-1.5 h-1.5 rounded-full bg-accent/40"/> Prime Selection</span>
                       </div>
                     </div>
@@ -247,7 +247,7 @@ const MovieShows = () => {
         {/* Right Column: Offers & Details */}
         <div className="w-full md:w-1/3 space-y-8">
           <div>
-            <h2 className="text-[20px] font-bold text-white mb-4">Top offers for you</h2>
+            <h2 className="text-3xl font-cinematic text-white mb-4 tracking-tight">Top offers for you</h2>
             <div className="space-y-4">
               <div className="bg-[#111815] border border-dashed border-accent/30 rounded-2xl p-5 cursor-pointer hover:bg-accent/5 transition-all group">
                 <div className="flex items-start gap-4">
