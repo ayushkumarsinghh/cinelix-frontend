@@ -15,6 +15,8 @@ import Plans from './pages/Plans';
 import Profile from './pages/Profile';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import axios from 'axios';
 
 function App() {
@@ -41,6 +43,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-[#070b0a]">
         <Navbar />
         <Routes>
@@ -57,6 +60,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/" element={<Navigate to="/movies" replace />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );
