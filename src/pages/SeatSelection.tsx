@@ -25,22 +25,27 @@ const SeatSelection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [seats, setSeats] = useState<Seat[]>([]);
+  const [show, setShow] = useState<any>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLocking, setIsLocking] = useState(false);
 
   useEffect(() => {
-    const fetchSeats = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`/api/shows/${id}/seats`);
-        setSeats(response.data);
+        const [seatsRes, showRes] = await Promise.all([
+          axios.get(`/api/shows/${id}/seats`),
+          axios.get(`/api/shows/${id}`)
+        ]);
+        setSeats(seatsRes.data);
+        setShow(showRes.data);
       } catch (err) {
-        console.error('Error fetching seats:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchSeats();
+    fetchData();
 
     // Socket listeners
     socket.emit('join_show', id);
@@ -138,53 +143,44 @@ const SeatSelection = () => {
       {/* Screen */}
       <div className="relative mb-20">
         <div className="w-full h-2 bg-gradient-to-r from-transparent via-primary/40 to-transparent rounded-full shadow-[0_-10px_20px_rgba(229,9,20,0.3)]"></div>
-        <p className="text-center text-xs text-gray-600 mt-4 tracking-[0.5em] uppercase">Screen this way</p>
+        <p className="text-center text-[10px] text-gray-600 mt-4 tracking-[0.5em] uppercase font-bold">Cinema Screen This Way</p>
       </div>
 
       {/* Seat Grid */}
       <div className="flex flex-col gap-4 mb-20 overflow-x-auto pb-4">
-        {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].map((rowLabel) => {
-          const rowSeats = seats.filter(s => s.row === rowLabel);
-          
-          // If row is one of our "aisles" (skipped in seed), render a gap
-          if (rowSeats.length === 0) {
-            return <div key={rowLabel} className="h-8 w-full" />;
-          }
-
-          return (
-            <div key={rowLabel} className="flex items-center gap-6 justify-center min-w-max">
-              <span className="w-6 text-xs text-gray-600 font-bold">{rowLabel}</span>
-              <div className="flex gap-3">
-                {rowSeats.sort((a, b) => a.number - b.number).map((seat) => {
-                  const isSelected = selectedSeats.includes(seat.id);
-                  const isOccupied = seat.status !== 'AVAILABLE';
-                  
-                  return (
-                    <button
-                      key={seat.id}
-                      disabled={isOccupied}
-                      onClick={() => toggleSeat(seat.id)}
-                      className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 relative group",
-                        isOccupied ? "bg-gray-800 text-gray-900 cursor-not-allowed" : 
-                        isSelected ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" : 
-                        "bg-white/5 text-gray-400 hover:bg-white/20 border border-white/5"
-                      )}
-                    >
-                      <Armchair className="w-4 h-4" />
-                      {!isOccupied && (
-                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
-                          {rowLabel}{seat.number}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="w-6 text-xs text-gray-600 font-bold">{rowLabel}</span>
+        {Object.entries(rows).map(([rowLabel, rowSeats]) => (
+          <div key={rowLabel} className="flex items-center gap-6 justify-center min-w-max">
+            <span className="w-6 text-xs text-gray-600 font-bold">{rowLabel}</span>
+            <div className="flex gap-3">
+              {rowSeats.sort((a, b) => a.number - b.number).map((seat) => {
+                const isSelected = selectedSeats.includes(seat.id);
+                const isOccupied = seat.status !== 'AVAILABLE';
+                
+                return (
+                  <button
+                    key={seat.id}
+                    disabled={isOccupied}
+                    onClick={() => toggleSeat(seat.id)}
+                    className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 relative group",
+                      isOccupied ? "bg-gray-800 text-gray-900 cursor-not-allowed" : 
+                      isSelected ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110" : 
+                      "bg-white/5 text-gray-400 hover:bg-white/20 border border-white/5"
+                    )}
+                  >
+                    <Armchair className="w-4 h-4" />
+                    {!isOccupied && (
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                        {rowLabel}{seat.number}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          );
-        })}
+            <span className="w-6 text-xs text-gray-600 font-bold">{rowLabel}</span>
+          </div>
+        ))}
       </div>
 
       {/* Footer / Summary */}
@@ -208,7 +204,7 @@ const SeatSelection = () => {
         <div className="flex items-center gap-8">
           <div className="text-right">
             <p className="text-sm text-gray-400">Total Price</p>
-            <p className="text-3xl font-bold text-white">₹{selectedSeats.length * 250}</p>
+            <p className="text-3xl font-bold text-white">₹{selectedSeats.length * (show?.price || 0)}</p>
           </div>
           <button
             onClick={handleProceed}
