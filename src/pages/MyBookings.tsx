@@ -64,7 +64,7 @@ const MyBookings = () => {
         <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
           <Ticket className="text-primary w-6 h-6" />
         </div>
-        <h1 className="text-3xl font-bold text-white">My Bookings</h1>
+        <h1 className="text-4xl font-cinematic text-white tracking-tight">My Bookings</h1>
       </div>
 
       <div className="space-y-6">
@@ -80,7 +80,7 @@ const MyBookings = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
                   <div className="absolute bottom-4 left-4">
-                    <span className={booking.status === 'CONFIRMED' ? 'bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider' : 'bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider'}>
+                    <span className={booking.status === 'CONFIRMED' ? 'bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider' : 'bg-accent text-[#070b0a] text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider'}>
                       {booking.status}
                     </span>
                   </div>
@@ -89,7 +89,7 @@ const MyBookings = () => {
                 <div className="flex-1 p-8">
                   <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-2">{booking.show?.movie?.title}</h2>
+                      <h2 className="text-3xl font-cinematic text-white mb-2 tracking-tight">{booking.show?.movie?.title}</h2>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                         <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" /> {booking.show ? new Date(booking.show.startTime).toLocaleDateString() : 'N/A'}</span>
                         <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-primary" /> {booking.show?.theatre?.name}</span>
@@ -187,7 +187,7 @@ const MyBookings = () => {
                   <span className="text-xs font-bold text-primary uppercase tracking-[0.2em]">Digital Ticket</span>
                 </div>
                 
-                <h3 className="text-3xl font-bold text-white mb-4 leading-tight">{selectedBooking.show?.movie?.title}</h3>
+                <h3 className="text-3xl font-cinematic text-white mb-4 leading-tight tracking-tight">{selectedBooking.show?.movie?.title}</h3>
                 
                 <div className="grid grid-cols-2 gap-y-6 mb-8">
                   <div>
@@ -228,10 +228,10 @@ const MyBookings = () => {
                   if (isCompleted) {
                     return (
                       <div className="flex flex-col items-center py-6">
-                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
-                          <X className="w-10 h-10 text-red-500" />
+                        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                          <X className="w-10 h-10 text-primary" />
                         </div>
-                        <p className="text-red-500 font-bold mb-1">Show Completed</p>
+                        <p className="text-primary font-bold mb-1 uppercase tracking-wider">Show Completed</p>
                         <p className="text-gray-500 text-xs text-center px-8">
                           This ticket is no longer valid as the show has ended.
                         </p>
