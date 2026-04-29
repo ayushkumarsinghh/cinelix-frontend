@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
         jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
         instrument: ['"Instrument Serif"', 'serif'],
         cinematic: ['"Playfair Display"', 'serif'],
