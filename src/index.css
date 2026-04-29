@@ -9,6 +9,7 @@
   --primary-hover: #C10712;
   --surface: #141414;
   --surface-alt: #1F1F1F;
+  color-scheme: dark;
 }
 
 body {
@@ -77,4 +78,16 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1.05);
   z-index: 10;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Fix for native date pickers in dark mode */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
