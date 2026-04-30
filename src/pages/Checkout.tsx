@@ -22,6 +22,7 @@ const Checkout = () => {
   const [useWallet, setUseWallet] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -31,13 +32,19 @@ const Checkout = () => {
           }),
           axios.get(`/api/shows/${showId}`)
         ]);
-        setUser(userRes.data);
-        setShow(showRes.data);
+        
+        if (isMounted) {
+          setUser(userRes.data);
+          setShow(showRes.data);
+        }
       } catch (err) {
-        console.error('Failed to fetch data', err);
+        if (isMounted) {
+          console.error('Failed to fetch data', err);
+        }
       }
     };
     fetchData();
+    return () => { isMounted = false; };
   }, [showId]);
 
   const ticketPrice = (seatIds?.length || 0) * (show?.price || 0);
